@@ -5,9 +5,9 @@
 <title>Δρομολόγια</title>
 <style>
 :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark;--bg:#0b1220;--panel:#17365f;--edge:#356295;--fg:#fff;--sub:#d7e6fb;--accent:#307ddd;--accent-edge:#80b8ff;--nav:#122b50;--active:#285b9a;--field:#101e32;--secondary:#22558f}
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg)}body{min-height:100dvh;display:flex;flex-direction:column}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg)}body{height:100%;min-height:100dvh;height:100dvh;display:flex;flex-direction:column}
 button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.48}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #8dc3ff;outline-offset:2px}
-#scroll{flex:1;overflow:auto;scrollbar-width:thin;overscroll-behavior-y:contain}.wrap{max-width:1030px;margin:0 auto;padding:18px 16px 28px}
+#scroll{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;scroll-padding-bottom:20px}.wrap{max-width:1030px;margin:0 auto;padding:18px 16px 28px}
 header{text-align:center;padding:3px 0 8px}.logo{width:43px;height:43px;border:1px solid var(--accent-edge);background:#24568c;display:grid;place-items:center;border-radius:14px;margin:0 auto 7px;box-shadow:0 8px 22px #0005}.logo svg{width:27px;height:27px}header h1{font-size:21px;margin:0 0 4px;font-weight:800}header p{font-size:13px;color:var(--sub);margin:0}
 h2{font-size:19px;text-align:center;margin:22px 0 15px}.meta{text-align:center;color:var(--sub);font-size:13px;margin:0 0 16px}.muted{color:var(--sub)}.sub{color:var(--sub);font-size:12px}.card{background:var(--panel);border:1px solid var(--edge);border-radius:18px;padding:17px;box-shadow:0 5px 20px #040d1b55}.route-grid{display:grid;grid-template-columns:1fr;gap:14px}.route-top{display:flex;gap:10px;justify-content:space-between;align-items:center}.route-top h3{font-size:19px;margin:0}.tag{display:inline-flex;align-items:center;justify-content:center;border-radius:99px;padding:5px 10px;font-size:11px;font-weight:750;background:#295c96;border:1px solid #6598d6;color:white;white-space:nowrap}.tag.wait{background:#253e60}.tag.active{background:#306caf}.tag.done{background:#18625a;border-color:#3fa897}.driver-name{text-align:center;font-size:17px;font-weight:700;margin:12px 0}.controls{display:flex;gap:10px;align-items:stretch;margin-top:13px}.controls select{flex:1;min-width:0}.btn{border:1px solid var(--accent-edge);border-radius:12px;background:var(--accent);color:#fff;padding:12px 15px;min-height:46px;font-weight:800}.btn.secondary{background:var(--secondary);border-color:#5b8bbe}.btn.ghost{background:transparent;border-color:#6794cc;color:#fff}.btn.warn{background:#783b4c;border-color:#d893a1}.btn.full{width:100%}.mini-btn{border:1px solid #5685c0;background:#204b7b;color:#fff;border-radius:9px;padding:7px 10px;font-size:12px}.card p{margin:9px 0}.time-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:15px 0 11px}.time-cell{border-radius:12px;border:1px solid #456f9e;background:#204675;padding:12px 5px;text-align:center}.time-cell .time{display:block;font-size:clamp(20px,5vw,27px);font-weight:800;font-variant-numeric:tabular-nums;margin:4px 0}.time-cell small{font-size:11px;color:#e1edff}.prediction{background:#102a4b;border:1px solid #3e6eaa;border-radius:12px;text-align:center;padding:10px;margin:12px 0;color:#e4f0ff;font-size:13px}.prediction b{color:#c4e5ff}.metric-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 18px}.metric{border:1px solid var(--edge);border-radius:14px;background:#17365f;text-align:center;padding:12px 4px}.metric strong{display:block;font-size:24px}.metric small{display:block;font-size:11px;color:#d7e6fb;margin-top:3px}.action-row{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:13px}.empty{border:1px dashed #467bb6;border-radius:14px;padding:22px;text-align:center;color:#d6e8ff;background:#142b4c}.stack{display:grid;gap:12px}.toolbar{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;align-items:end;margin:13px 0 18px}.field{display:flex;flex-direction:column;gap:6px;color:#e9f3ff;font-size:13px;min-width:0}.field input,.field select,textarea,.controls select{background:var(--field);border:1px solid #5079aa;border-radius:11px;padding:11px 10px;color:#fff;min-height:44px}.field input[type=date]{min-width:136px}.field select{min-width:135px}.summary{padding:14px;text-align:center;margin-bottom:13px}.summary strong{font-size:18px}.history-card{display:grid;gap:7px}.history-card .row{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap}.history-card strong{font-size:16px}.history-card .duration{font-size:18px;font-weight:800}.small{font-size:12px}.stats-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}.stats-table th,.stats-table td{padding:12px 6px;border-bottom:1px solid #4775a6;text-align:left;font-size:13px}.stats-table th{font-size:11px;color:#d7e6fb}.stats-table td:not(:first-child),.stats-table th:not(:first-child){text-align:right}.stats-table tr:last-child td{border-bottom:0}.good{color:#93ebcf}.late{color:#ffdbaf}.hidden{display:none!important}.settings-person{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #4775a6}.settings-person:last-child{border-bottom:0}.settings-person .identity{min-width:0;overflow-wrap:anywhere}.settings-person .actions{display:flex;gap:6px;flex-wrap:wrap}.status{position:fixed;bottom:82px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 24px);border:1px solid #709acf;border-radius:12px;background:#18355d;color:#fff;padding:11px 16px;z-index:120;box-shadow:0 8px 28px #0009;font-size:13px}.status.error{background:#632934;border-color:#d37b87}.footer{text-align:center;font-size:11px;color:#a9c7e9;margin:28px 0 8px}
 .bottom-nav{position:relative;flex:0 0 auto;z-index:10;background:#122b50f8;border-top:1px solid #4b7dbf;display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:580px;margin:0 auto;padding:7px 9px calc(8px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 27px #0008}.bottom-nav button{border:0;border-radius:12px;background:transparent;color:#d0dff7;display:grid;justify-items:center;align-content:center;gap:3px;font-size:11px;min-height:55px}.bottom-nav button span{font-size:23px;line-height:1}.bottom-nav button.active{background:#285b9a;color:#fff}
@@ -29,6 +29,69 @@ dialog{max-width:min(480px,calc(100vw - 24px));width:100%;border:1px solid #6e9b
 .history-tools{margin:0 0 14px}
 @media(min-width:700px){.route-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:22px 26px}.route-grid .card{min-height:205px}.history-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:360px){.controls{flex-direction:column}.stats-table th,.stats-table td{padding:9px 3px;font-size:11px}}
+/* Easy one-handed use on mobile; retains the original dark-blue theme. */
+button,input,select,textarea{touch-action:manipulation}
+button:not(:disabled):active{filter:brightness(1.14)}
+.route-card.is-active{border-color:#7cb4fb}
+.route-card.is-done{border-color:#4ba18e}
+.route-card .tag{max-width:60%;text-align:center}
+@media(max-width:699px){
+ .wrap{padding:11px 12px 20px}
+ header{display:flex;justify-content:center;align-items:center;gap:10px;padding:2px 0 8px}
+ header .logo{width:38px;height:38px;border-radius:12px;margin:0}
+ header .logo svg{width:24px;height:24px}
+ header h1{font-size:20px;line-height:1.2;margin:0}
+ h2{font-size:18px;margin:12px 0 8px}
+ .meta{font-size:13px;line-height:1.5;margin:0 0 12px}
+ .route-grid{gap:12px}
+ .route-card{padding:16px;border-radius:17px;min-height:0}
+ .route-top h3{font-size:19px}
+ .tag{font-size:12px;min-height:29px;padding:5px 10px}
+ .route-controls{margin-top:12px;gap:7px}
+ .route-controls select{font-size:16px;min-height:52px;padding:10px 12px}
+ .route-buttons{gap:8px;margin-top:6px}
+ .route-buttons .btn{min-height:54px;font-size:17px;border-radius:13px}
+ .route-card .driver-name{font-size:18px;margin:10px 0}
+ .trip-line{padding:11px 12px;font-size:14px;line-height:1.55}
+ .trip-line b,.trip-line strong{font-size:17px}
+ .route-card .action-row{margin-top:8px;padding-top:4px}
+ .route-card .mini-btn{width:100%;min-height:46px;font-size:14px}
+ .route-hint{line-height:1.4;margin-top:9px!important}
+ .bottom-nav{width:100%;max-width:none;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));gap:3px}
+ .bottom-nav button{min-width:0;min-height:59px;gap:3px;font-size:12px;line-height:1.18;padding:6px 3px;border-radius:12px}
+ .bottom-nav button span{font-size:22px}
+ .bottom-nav button.active{box-shadow:inset 0 1px 0 #79a9ec75}
+ .status{bottom:calc(83px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 24px);font-size:14px;line-height:1.45;text-align:center}
+ .toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:8px 0 15px;align-items:stretch}
+ .toolbar .field{width:100%;min-width:0}
+ .toolbar .field input,.toolbar .field select{width:100%;min-width:0;min-height:50px;font-size:16px;padding:9px 7px}
+ .toolbar button{min-height:50px;font-size:15px}
+ .history-card{gap:10px;padding:15px}
+ .history-card .duration{font-size:19px}
+ .history-card .action-row{display:grid;grid-template-columns:1fr;width:100%;gap:8px}
+ .history-card .action-row button{width:100%;min-height:46px;font-size:14px}
+ .history-tools button{min-height:48px}
+ .stats-table{min-width:470px}
+ .settings-person{align-items:stretch;flex-direction:column;gap:10px;padding:15px 0}
+ .settings-person .identity strong{font-size:16px}
+ .settings-person .actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .settings-person .actions button{min-width:0;min-height:48px;font-size:13px;padding:8px 5px;overflow-wrap:anywhere}
+ dialog{width:calc(100% - 16px);max-width:480px;max-height:calc(100dvh - 24px);overflow-y:auto;padding:18px 16px;border-radius:17px;overscroll-behavior:contain}
+ dialog h2{font-size:19px;margin:0 0 8px}
+ dialog form{gap:11px}
+ dialog .field input,dialog .field select,dialog textarea{font-size:16px;min-height:50px;width:100%;min-width:0}
+ dialog textarea{min-height:75px}
+ dialog .buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ dialog .buttons button{min-width:0;min-height:50px;font-size:15px;padding:10px 6px}
+ dialog [data-do="remove-run"]{min-height:49px}
+}
+@media(max-width:350px){
+ .wrap{padding-left:9px;padding-right:9px}
+ .toolbar{grid-template-columns:1fr}
+ .bottom-nav button{font-size:11px;padding:5px 0}
+ .bottom-nav button span{font-size:21px}
+}
+
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 4v2h-7z"/><circle cx="7.5" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></div><h1>Δρομολόγια</h1></header>
@@ -84,7 +147,7 @@ function renderToday(){
  for(const r of state.routes){
   const rec=state.today.find(x=>x.route_code===r.code),status=rec?(rec.arrival_at?"done":"active"):"wait";
   const label=rec?(rec.arrival_at?"Ολοκληρώθηκε":"Στον δρόμο"):"Αναμονή";
-  s+='<section class="card route-card"><div class="route-top"><h3>'+safe(r.name)+'</h3><span class="tag '+status+'">'+label+'</span></div>';
+  s+='<section class="card route-card is-'+status+'"><div class="route-top"><h3>'+safe(r.name)+'</h3><span class="tag '+status+'">'+label+'</span></div>';
   if(!rec){
    const picked=chosen[r.code]||"";
    s+='<div class="route-controls"><select aria-label="Οδηγός για '+safe(r.name)+'" data-pick="'+safe(r.code)+'"><option value="">Επιλογή οδηγού…</option>'+state.drivers.filter(d=>d.is_active).map(d=>'<option value="'+safe(d.id)+'" '+(d.id===picked?"selected":"")+'>'+safe(d.name)+'</option>').join("")+'</select>';
