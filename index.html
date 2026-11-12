@@ -8,17 +8,27 @@
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg)}body{min-height:100dvh;display:flex;flex-direction:column}
 button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.48}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #8dc3ff;outline-offset:2px}
 #scroll{flex:1;overflow:auto;scrollbar-width:thin;overscroll-behavior-y:contain}.wrap{max-width:1030px;margin:0 auto;padding:18px 16px 28px}
-header{text-align:center;padding:8px 0 17px}.logo{width:56px;height:56px;border:1px solid var(--accent-edge);background:#24568c;display:grid;place-items:center;border-radius:18px;margin:0 auto 10px;box-shadow:0 8px 22px #0005}.logo svg{width:34px;height:34px}header h1{font-size:23px;margin:0 0 4px;font-weight:800}header p{font-size:13px;color:var(--sub);margin:0}
+header{text-align:center;padding:3px 0 8px}.logo{width:43px;height:43px;border:1px solid var(--accent-edge);background:#24568c;display:grid;place-items:center;border-radius:14px;margin:0 auto 7px;box-shadow:0 8px 22px #0005}.logo svg{width:27px;height:27px}header h1{font-size:21px;margin:0 0 4px;font-weight:800}header p{font-size:13px;color:var(--sub);margin:0}
 h2{font-size:19px;text-align:center;margin:22px 0 15px}.meta{text-align:center;color:var(--sub);font-size:13px;margin:0 0 16px}.muted{color:var(--sub)}.sub{color:var(--sub);font-size:12px}.card{background:var(--panel);border:1px solid var(--edge);border-radius:18px;padding:17px;box-shadow:0 5px 20px #040d1b55}.route-grid{display:grid;grid-template-columns:1fr;gap:14px}.route-top{display:flex;gap:10px;justify-content:space-between;align-items:center}.route-top h3{font-size:19px;margin:0}.tag{display:inline-flex;align-items:center;justify-content:center;border-radius:99px;padding:5px 10px;font-size:11px;font-weight:750;background:#295c96;border:1px solid #6598d6;color:white;white-space:nowrap}.tag.wait{background:#253e60}.tag.active{background:#306caf}.tag.done{background:#18625a;border-color:#3fa897}.driver-name{text-align:center;font-size:17px;font-weight:700;margin:12px 0}.controls{display:flex;gap:10px;align-items:stretch;margin-top:13px}.controls select{flex:1;min-width:0}.btn{border:1px solid var(--accent-edge);border-radius:12px;background:var(--accent);color:#fff;padding:12px 15px;min-height:46px;font-weight:800}.btn.secondary{background:var(--secondary);border-color:#5b8bbe}.btn.ghost{background:transparent;border-color:#6794cc;color:#fff}.btn.warn{background:#783b4c;border-color:#d893a1}.btn.full{width:100%}.mini-btn{border:1px solid #5685c0;background:#204b7b;color:#fff;border-radius:9px;padding:7px 10px;font-size:12px}.card p{margin:9px 0}.time-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:15px 0 11px}.time-cell{border-radius:12px;border:1px solid #456f9e;background:#204675;padding:12px 5px;text-align:center}.time-cell .time{display:block;font-size:clamp(20px,5vw,27px);font-weight:800;font-variant-numeric:tabular-nums;margin:4px 0}.time-cell small{font-size:11px;color:#e1edff}.prediction{background:#102a4b;border:1px solid #3e6eaa;border-radius:12px;text-align:center;padding:10px;margin:12px 0;color:#e4f0ff;font-size:13px}.prediction b{color:#c4e5ff}.metric-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 18px}.metric{border:1px solid var(--edge);border-radius:14px;background:#17365f;text-align:center;padding:12px 4px}.metric strong{display:block;font-size:24px}.metric small{display:block;font-size:11px;color:#d7e6fb;margin-top:3px}.action-row{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:13px}.empty{border:1px dashed #467bb6;border-radius:14px;padding:22px;text-align:center;color:#d6e8ff;background:#142b4c}.stack{display:grid;gap:12px}.toolbar{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;align-items:end;margin:13px 0 18px}.field{display:flex;flex-direction:column;gap:6px;color:#e9f3ff;font-size:13px;min-width:0}.field input,.field select,textarea,.controls select{background:var(--field);border:1px solid #5079aa;border-radius:11px;padding:11px 10px;color:#fff;min-height:44px}.field input[type=date]{min-width:136px}.field select{min-width:135px}.summary{padding:14px;text-align:center;margin-bottom:13px}.summary strong{font-size:18px}.history-card{display:grid;gap:7px}.history-card .row{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap}.history-card strong{font-size:16px}.history-card .duration{font-size:18px;font-weight:800}.small{font-size:12px}.stats-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}.stats-table th,.stats-table td{padding:12px 6px;border-bottom:1px solid #4775a6;text-align:left;font-size:13px}.stats-table th{font-size:11px;color:#d7e6fb}.stats-table td:not(:first-child),.stats-table th:not(:first-child){text-align:right}.stats-table tr:last-child td{border-bottom:0}.good{color:#93ebcf}.late{color:#ffdbaf}.hidden{display:none!important}.settings-person{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #4775a6}.settings-person:last-child{border-bottom:0}.settings-person .identity{min-width:0;overflow-wrap:anywhere}.settings-person .actions{display:flex;gap:6px;flex-wrap:wrap}.status{position:fixed;bottom:82px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 24px);border:1px solid #709acf;border-radius:12px;background:#18355d;color:#fff;padding:11px 16px;z-index:120;box-shadow:0 8px 28px #0009;font-size:13px}.status.error{background:#632934;border-color:#d37b87}.footer{text-align:center;font-size:11px;color:#a9c7e9;margin:28px 0 8px}
 .bottom-nav{position:relative;flex:0 0 auto;z-index:10;background:#122b50f8;border-top:1px solid #4b7dbf;display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:580px;margin:0 auto;padding:7px 9px calc(8px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 27px #0008}.bottom-nav button{border:0;border-radius:12px;background:transparent;color:#d0dff7;display:grid;justify-items:center;align-content:center;gap:3px;font-size:11px;min-height:55px}.bottom-nav button span{font-size:23px;line-height:1}.bottom-nav button.active{background:#285b9a;color:#fff}
 dialog{max-width:min(480px,calc(100vw - 24px));width:100%;border:1px solid #6e9bce;border-radius:19px;background:#17365f;color:#fff;padding:22px;box-shadow:0 16px 80px #000b}dialog::backdrop{background:#000a}dialog h2{margin:0 0 15px}dialog form{display:grid;gap:13px}dialog .buttons{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:9px}dialog textarea{min-height:76px;width:100%;resize:vertical}.note{font-size:12px;color:var(--sub);line-height:1.6}
-@media(min-width:700px){.route-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:22px 26px}.route-grid .card{min-height:290px}.history-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.route-card{display:flex;flex-direction:column;justify-content:flex-start;min-height:182px}
+.route-card .controls{margin-top:22px}
+.route-card .driver-name{margin:17px 0 8px}
+.route-card .action-row{margin-top:auto;padding-top:12px}
+.route-card .action-row .btn{flex:1}
+.route-card .mini-btn,.history-card .mini-btn{min-height:42px;padding:9px 12px}
+.route-hint{text-align:center;color:var(--sub);font-size:12px;margin-top:12px!important}
+.trip-line{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#204675;border:1px solid #456f9e;padding:12px;border-radius:12px;color:#eef6ff;font-size:14px}
+.trip-line b,.trip-line strong{font-size:17px;color:#fff;font-variant-numeric:tabular-nums}
+.history-tools{margin:0 0 14px}
+@media(min-width:700px){.route-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:22px 26px}.route-grid .card{min-height:205px}.history-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:360px){.controls{flex-direction:column}.stats-table th,.stats-table td{padding:9px 3px;font-size:11px}}
 </style></head>
 <body><div id="scroll"><div class="wrap">
-<header><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 4v2h-7z"/><circle cx="7.5" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></div><h1>Δρομολόγια</h1><p>Αναχωρήσεις • Αφίξεις • Χρόνοι</p></header>
+<header><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 4v2h-7z"/><circle cx="7.5" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></div><h1>Δρομολόγια</h1></header>
 <main id="main" aria-live="polite"><div class="empty">Σύνδεση με τη βάση δεδομένων…</div></main>
-<div class="footer">Μπλε θέμα VOLTES · Ώρα Ελλάδας · Τα δεδομένα συγχρονίζονται</div>
+
 </div></div>
 <nav class="bottom-nav" aria-label="Κύρια πλοήγηση">
 <button type="button" data-tab="today" class="active"><span>⌂</span>Σήμερα</button>
@@ -27,11 +37,11 @@ dialog{max-width:min(480px,calc(100vw - 24px));width:100%;border:1px solid #6e9b
 <button type="button" data-tab="drivers"><span>♙</span>Οδηγοί</button>
 </nav>
 <div id="toast" class="status hidden" role="status"></div>
-<dialog id="editDialog"><h2>Διόρθωση καταχώρισης</h2><form id="editForm">
+<dialog id="editDialog"><h2>Διόρθωση ή διαγραφή</h2><form id="editForm">
 <label class="field">Οδηγός<select id="editDriver" required></select></label>
 <label class="field">Αναχώρηση (ώρα Ελλάδας)<input type="datetime-local" id="editStart" required></label>
 <label class="field">Άφιξη (προαιρετικό)<input type="datetime-local" id="editEnd"></label>
-<label class="field">Αιτιολογία διόρθωσης<textarea id="editReason" maxlength="500" required placeholder="Π.χ. καθυστερημένη καταχώριση"></textarea></label>
+<label class="field">Αιτιολογία αλλαγής<textarea id="editReason" maxlength="500" required placeholder="Π.χ. καθυστερημένη καταχώριση"></textarea></label>
 <div class="buttons"><button type="button" class="btn secondary" data-do="close-edit">Ακύρωση</button><button type="button" class="btn" data-do="save-edit">Αποθήκευση</button></div>
 <button type="button" class="btn warn" data-do="remove-run">Διαγραφή καταχώρισης</button>
 <p class="note">Όλες οι διορθώσεις καταγράφονται στο ιστορικό αλλαγών.</p>
@@ -41,7 +51,7 @@ dialog{max-width:min(480px,calc(100vw - 24px));width:100%;border:1px solid #6e9b
 const $=id=>document.getElementById(id);
 let state={routes:[],drivers:[],today:[],stats:[],routeStats:[],todayDate:""};
 let tab="today",busy=false,editing=null,historyRows=[],historyLoaded=false;
-let histFrom="",histTo="",routeFilter="",driverFilter="",statRoute="A",chosen={};
+let histFrom="",histTo="",routeFilter="",driverFilter="",statRoute="A",chosen={},historyFiltersOpen=false;
 const apiBase="https://oikcdjnxkmgrpyedxera.supabase.co/functions/v1/dromologia/";
 const safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const localDay=()=>new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Athens",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
@@ -60,21 +70,35 @@ async function request(action,body=null,params={}){const url=new URL(apiBase,loc
 async function refresh(show=true){if(busy&&show)return;try{const result=await request("state");state=result;if(tab==="today"||tab==="stats"||tab==="drivers")render();if(show)toast("Τα δεδομένα ενημερώθηκαν.");}catch(e){toast(e.message,true);if(!state.routes.length)$("main").innerHTML='<div class="empty">Αδυναμία σύνδεσης. Έλεγξε το Internet και πάτησε επανάληψη.<div class="action-row"><button class="btn" data-do="refresh">Επανάληψη</button></div></div>';}}
 async function doAction(action,body){if(busy)return;busy=true;document.querySelectorAll("button").forEach(b=>{if(b.dataset.do)b.disabled=true});try{await request(action,body);await refresh(false);if(tab==="history")await loadHistory();toast("Η καταχώριση αποθηκεύτηκε και συγχρονίστηκε.");return true}catch(e){toast(e.message,true);return false}finally{busy=false;render();}}
 function render(){document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));if(tab==="today")renderToday();else if(tab==="history")renderHistory();else if(tab==="stats")renderStats();else renderDrivers();}
-function renderToday(){const done=state.today.filter(r=>!!r.arrival_at).length,open=state.today.filter(r=>!r.arrival_at).length;const day=state.todayDate||localDay();const work=isWorkday(day);
-let s='<h2>Σημερινά δρομολόγια</h2><p class="meta">'+dayLabel(day)+' · '+(work?"Εργάσιμη ημέρα":"Σαββατοκύριακο")+'</p>';
-s+='<div class="metric-bar"><div class="metric"><strong>'+Math.max(0,state.routes.length-state.today.length)+'</strong><small>Αναμονή</small></div><div class="metric"><strong>'+open+'</strong><small>Στον δρόμο</small></div><div class="metric"><strong>'+done+'</strong><small>Ολοκληρώθηκαν</small></div></div>';
-if(!work)s+='<p class="empty">Δεν υπάρχουν προγραμματισμένα δρομολόγια για Σαββατοκύριακο.</p>';
-s+='<div class="route-grid">';
-for(const r of state.routes){const rec=state.today.find(x=>x.route_code===r.code);const status=rec?(rec.arrival_at?"done":"active"):"wait";let label=rec?(rec.arrival_at?"Ολοκληρώθηκε":"Στον δρόμο"):"Αναμονή";
-s+='<section class="card"><div class="route-top"><h3>'+safe(r.name)+'</h3><span class="tag '+status+'">'+label+'</span></div>';
-if(!rec){const picked=chosen[r.code]||"";s+='<p class="sub" style="text-align:center">Επίλεξε οδηγό για την αναχώρηση</p><div class="controls"><select aria-label="Οδηγός" data-pick="'+safe(r.code)+'"><option value="">Επιλογή οδηγού…</option>'+state.drivers.filter(d=>d.is_active).map(d=>'<option value="'+safe(d.id)+'" '+(d.id===picked?"selected":"")+'>'+safe(d.name)+'</option>').join("")+'</select><button class="btn" data-do="start" data-route="'+safe(r.code)+'" '+(!work?"disabled":"")+'>Αναχώρηση</button></div>';
-const st=countSamples(picked,r.code);if(st)s+='<p class="prediction">Μ.Ο. οδηγού: <b>'+duration(st.avg_seconds)+'</b> · '+st.trips+' διαδρομές</p>';
-}else{
-s+='<p class="driver-name">'+safe(driverName(rec.driver_id))+'</p><div class="time-grid"><div class="time-cell"><small>Αναχώρηση</small><span class="time">'+clock(rec.departure_at)+'</span></div><div class="time-cell"><small>Άφιξη</small><span class="time">'+clock(rec.arrival_at)+'</span></div></div>';
-if(!rec.arrival_at){s+='<p class="prediction">Εκτιμώμενη επιστροφή: <b>'+(rec.estimated_return_at?clock(rec.estimated_return_at):"Χωρίς ιστορικό οδηγού")+'</b>'+(rec.estimation_samples?' · '+rec.estimation_samples+' προηγούμενες':'')+'</p><div class="action-row"><button class="btn" data-do="arrive" data-id="'+safe(rec.id)+'">Άφιξη</button><button class="mini-btn" data-do="edit" data-id="'+safe(rec.id)+'">Διόρθωση</button></div>';}
-else{let diff=rec.estimated_return_at?Math.round((Date.parse(rec.arrival_at)-Date.parse(rec.estimated_return_at))/1000):null;s+='<p class="prediction">Διάρκεια: <b>'+duration(lengthSecs(rec))+'</b>'+(diff!==null?' · Απόκλιση πρόβλεψης <b>'+delta(diff)+'</b>':'')+'</p><div class="action-row"><button class="mini-btn" data-do="edit" data-id="'+safe(rec.id)+'">Διόρθωση</button></div>';}
-} s+='</section>';
-}s+='</div><p class="meta" style="margin-top:20px">Οι ώρες καταγράφονται αυτόματα στον διακομιστή και εμφανίζονται σε ώρα Ελλάδας.</p>';$("main").innerHTML=s;}
+function renderToday(){
+ const done=state.today.filter(r=>!!r.arrival_at).length,open=state.today.filter(r=>!r.arrival_at).length;
+ const day=state.todayDate||localDay(),work=isWorkday(day);
+ let s='<h2>Σήμερα</h2><p class="meta">'+dayLabel(day)+' · '+open+' στον δρόμο · '+done+' ολοκληρώθηκαν</p>';
+ if(!work)s+='<p class="empty">Σαββατοκύριακο — δεν υπάρχουν προγραμματισμένες αναχωρήσεις.</p>';
+ s+='<div class="route-grid">';
+ for(const r of state.routes){
+  const rec=state.today.find(x=>x.route_code===r.code),status=rec?(rec.arrival_at?"done":"active"):"wait";
+  const label=rec?(rec.arrival_at?"Ολοκληρώθηκε":"Στον δρόμο"):"Αναμονή";
+  s+='<section class="card route-card"><div class="route-top"><h3>'+safe(r.name)+'</h3><span class="tag '+status+'">'+label+'</span></div>';
+  if(!rec){
+   const picked=chosen[r.code]||"";
+   s+='<div class="controls"><select aria-label="Οδηγός για '+safe(r.name)+'" data-pick="'+safe(r.code)+'"><option value="">Επιλογή οδηγού…</option>'+state.drivers.filter(d=>d.is_active).map(d=>'<option value="'+safe(d.id)+'" '+(d.id===picked?"selected":"")+'>'+safe(d.name)+'</option>').join("")+'</select><button class="btn" data-do="start" data-route="'+safe(r.code)+'" '+(!work?"disabled":"")+'>Αναχώρηση</button></div>';
+   const st=countSamples(picked,r.code);
+   if(st)s+='<p class="route-hint">Συνήθης χρόνος: <b>'+duration(st.avg_seconds)+'</b></p>';
+  }else{
+   s+='<p class="driver-name">'+safe(driverName(rec.driver_id))+'</p>';
+   if(!rec.arrival_at){
+    s+='<p class="trip-line"><span>Αναχώρηση <b>'+clock(rec.departure_at)+'</b></span><span>Εκτίμηση <b>'+(rec.estimated_return_at?clock(rec.estimated_return_at):"—")+'</b></span></p>';
+    s+='<div class="action-row"><button class="btn" data-do="arrive" data-id="'+safe(rec.id)+'">Άφιξη</button><button class="mini-btn" data-do="edit" data-id="'+safe(rec.id)+'">Διόρθωση / Διαγραφή</button></div>';
+   }else{
+    s+='<p class="trip-line"><span>'+clock(rec.departure_at)+' → '+clock(rec.arrival_at)+'</span><strong>'+duration(lengthSecs(rec))+'</strong></p>';
+    s+='<div class="action-row"><button class="mini-btn" data-do="edit" data-id="'+safe(rec.id)+'">Διόρθωση / Διαγραφή</button></div>';
+   }
+  }
+  s+='</section>';
+ }
+ $("main").innerHTML=s+'</div>';
+}
 function renderStats(){const r=statRoute||"A";const base=routeAvg(r);const d=state.stats.filter(x=>x.route_code===r).sort((a,b)=>a.avg_seconds-b.avg_seconds);
 let s='<h2>Στατιστικά οδηγών</h2><p class="meta">Σύγκριση μόνο στο ίδιο δρομολόγιο</p><div class="toolbar"><label class="field">Δρομολόγιο<select id="statRoute">'+state.routes.map(x=>'<option value="'+safe(x.code)+'" '+(x.code===r?'selected':'')+'>'+safe(x.name)+'</option>').join("")+'</select></label></div>';
 if(!base){s+='<div class="empty">Δεν υπάρχουν ακόμη ολοκληρωμένες διαδρομές για σύγκριση.</div>';}else{
@@ -83,11 +107,23 @@ for(const row of d){const dif=row.avg_seconds-base.avg_seconds;s+='<tr><td>'+saf
 s+='</tbody></table></div></section><p class="note" style="text-align:center">Η διαφορά συγκρίνει τον μέσο χρόνο κάθε οδηγού με τον μέσο χρόνο όλων των καταγραφών του ίδιου δρομολογίου. Η κίνηση, οι στάσεις και οι συνθήκες επηρεάζουν τις διάρκειες.</p>';
 }
 $("main").innerHTML=s;}
-function renderHistory(){const s='<h2>Ιστορικό δρομολογίων</h2><div class="toolbar"><label class="field">Από<input type="date" id="histFrom" value="'+safe(histFrom)+'"></label><label class="field">Έως<input type="date" id="histTo" value="'+safe(histTo)+'"></label><label class="field">Δρομολόγιο<select id="histRoute"><option value="">Όλα</option>'+state.routes.map(r=>'<option value="'+safe(r.code)+'" '+(routeFilter===r.code?"selected":"")+'>'+safe(r.name)+'</option>').join("")+'</select></label><label class="field">Οδηγός<select id="histDriver"><option value="">Όλοι</option>'+state.drivers.map(d=>'<option value="'+safe(d.id)+'" '+(driverFilter===d.id?"selected":"")+'>'+safe(d.name)+'</option>').join("")+'</select></label><button class="btn" data-do="history-load">Αναζήτηση</button><button class="btn secondary" data-do="export">CSV</button></div>';
-let f=historyRows.filter(x=>(!routeFilter||x.route_code===routeFilter)&&(!driverFilter||x.driver_id===driverFilter));let out=s+'<p class="meta">'+(historyLoaded?f.length+' καταχωρίσεις για το επιλεγμένο διάστημα':'Φόρτωση ιστορικού…')+'</p>';
-out+='<div class="stack history-list">';
-for(const rec of f){out+='<section class="card history-card"><div class="row"><strong>'+safe(routeName(rec.route_code))+'</strong><span class="tag '+(rec.arrival_at?"done":"active")+'">'+(rec.arrival_at?"Ολοκληρώθηκε":"Στον δρόμο")+'</span></div><div class="sub">'+dayLabel(rec.service_date)+' · '+safe(driverName(rec.driver_id))+'</div><div class="row"><span>'+clock(rec.departure_at)+' → '+clock(rec.arrival_at)+'</span><span class="duration">'+duration(lengthSecs(rec))+'</span></div><div class="row"><span class="sub">'+(rec.estimated_return_at?"Πρόβλεψη "+clock(rec.estimated_return_at):"Χωρίς πρόβλεψη")+'</span>'+(rec.arrival_at?'':'<button class="mini-btn" data-do="arrive" data-id="'+safe(rec.id)+'">Άφιξη</button>')+'<button class="mini-btn" data-do="edit" data-id="'+safe(rec.id)+'">Διόρθωση</button></div></section>';}
-out+='</div>';if(historyLoaded&&!f.length)out+='<div class="empty">Δεν βρέθηκαν καταχωρίσεις.</div>';$("main").innerHTML=out;}
+function renderHistory(){
+ let s='<h2>Ιστορικό</h2><p class="meta">'+dayLabel(histFrom)+' – '+dayLabel(histTo)+'</p>';
+ s+='<div class="action-row history-tools"><button class="btn secondary" data-do="toggle-filters" aria-expanded="'+historyFiltersOpen+'">'+(historyFiltersOpen?"Κλείσιμο φίλτρων":"Φίλτρα · Εξαγωγή CSV")+'</button></div>';
+ if(historyFiltersOpen){
+  s+='<div class="toolbar"><label class="field">Από<input type="date" id="histFrom" value="'+safe(histFrom)+'"></label><label class="field">Έως<input type="date" id="histTo" value="'+safe(histTo)+'"></label><label class="field">Δρομολόγιο<select id="histRoute"><option value="">Όλα</option>'+state.routes.map(r=>'<option value="'+safe(r.code)+'" '+(routeFilter===r.code?"selected":"")+'>'+safe(r.name)+'</option>').join("")+'</select></label><label class="field">Οδηγός<select id="histDriver"><option value="">Όλοι</option>'+state.drivers.map(d=>'<option value="'+safe(d.id)+'" '+(driverFilter===d.id?"selected":"")+'>'+safe(d.name)+'</option>').join("")+'</select></label><button class="btn" data-do="history-load">Αναζήτηση</button><button class="btn secondary" data-do="export">CSV</button></div>';
+ }
+ const f=historyRows.filter(x=>(!routeFilter||x.route_code===routeFilter)&&(!driverFilter||x.driver_id===driverFilter));
+ let out=s+'<p class="meta">'+(historyLoaded?f.length+' καταχωρίσεις':'Φόρτωση ιστορικού…')+'</p><div class="stack history-list">';
+ for(const rec of f){
+  out+='<section class="card history-card"><div class="row"><strong>'+safe(routeName(rec.route_code))+'</strong><span class="tag '+(rec.arrival_at?"done":"active")+'">'+(rec.arrival_at?"Ολοκληρώθηκε":"Στον δρόμο")+'</span></div>';
+  out+='<div class="sub">'+dayLabel(rec.service_date)+' · '+safe(driverName(rec.driver_id))+'</div><div class="row"><span>'+clock(rec.departure_at)+' → '+clock(rec.arrival_at)+'</span><span class="duration">'+duration(lengthSecs(rec))+'</span></div>';
+  out+='<div class="action-row">'+(rec.arrival_at?'':'<button class="btn" data-do="arrive" data-id="'+safe(rec.id)+'">Άφιξη</button>')+'<button class="mini-btn" data-do="edit" data-id="'+safe(rec.id)+'">Διόρθωση / Διαγραφή</button></div></section>';
+ }
+ out+='</div>';
+ if(historyLoaded&&!f.length)out+='<div class="empty">Δεν βρέθηκαν καταχωρίσεις.</div>';
+ $("main").innerHTML=out;
+}
 function renderDrivers(){let s='<h2>Διαχείριση οδηγών</h2><div class="action-row" style="margin-bottom:18px"><button class="btn" data-do="driver-add">+ Νέος οδηγός</button></div><div class="card"><p class="sub" style="text-align:center">Οι παλιοί οδηγοί απενεργοποιούνται, αλλά διατηρούνται στο ιστορικό.</p>';
 for(const d of state.drivers){s+='<div class="settings-person"><div class="identity"><strong>'+safe(d.name)+'</strong><div class="sub">'+(d.is_active?"Ενεργός":"Ανενεργός")+'</div></div><div class="actions"><button class="mini-btn" data-do="driver-rename" data-id="'+safe(d.id)+'">Όνομα</button><button class="mini-btn" data-do="driver-toggle" data-id="'+safe(d.id)+'">'+(d.is_active?"Απενεργοποίηση":"Ενεργοποίηση")+'</button></div></div>';}
 $("main").innerHTML=s+'</div>';}
@@ -97,11 +133,12 @@ function toAthensLocal(iso){if(!iso)return "";const p=new Intl.DateTimeFormat("s
 function toUTC(local){if(!local)return null;const target=Date.parse(local+":00Z");if(!Number.isFinite(target))throw Error("Μη έγκυρη ημερομηνία.");let t=target;for(let i=0;i<4;i++){const p=toAthensLocal(new Date(t).toISOString());const actual=Date.parse(p+":00Z");t+=target-actual;}return new Date(t).toISOString();}
 function editRun(id){editing=state.today.find(x=>x.id===id)||historyRows.find(x=>x.id===id);if(!editing)return toast("Δεν βρέθηκε το δρομολόγιο.",true);$("editDriver").innerHTML=state.drivers.map(d=>'<option value="'+safe(d.id)+'">'+safe(d.name)+'</option>').join("");$("editDriver").value=editing.driver_id;$("editStart").value=toAthensLocal(editing.departure_at);$("editEnd").value=toAthensLocal(editing.arrival_at);$("editReason").value="";$("editDialog").showModal();}
 async function exportCsv(){const rows=await getAllHistory(true);const picked=rows.filter(x=>(!routeFilter||x.route_code===routeFilter)&&(!driverFilter||x.driver_id===driverFilter));const quote=s=>'"'+String(s??"").replace(/"/g,'""')+'"';const csv=[["Ημερομηνία","Δρομολόγιο","Οδηγός","Αναχώρηση","Άφιξη","Διάρκεια (λεπτά)","Εκτίμηση επιστροφής"].map(quote).join(";")];for(const r of picked)csv.push([r.service_date,routeName(r.route_code),driverName(r.driver_id),clock(r.departure_at),clock(r.arrival_at),lengthSecs(r)==null?"":Math.round(lengthSecs(r)/60),clock(r.estimated_return_at)].map(quote).join(";"));const blob=new Blob(["\uFEFF"+csv.join("\r\n")],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="dromologia_"+histFrom+"_"+histTo+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);toast("Εξαγωγή "+picked.length+" καταχωρίσεων.");}
-document.addEventListener("change",e=>{if(e.target.dataset.pick)chosen[e.target.dataset.pick]=e.target.value;if(e.target.id==="statRoute"){statRoute=e.target.value;renderStats();}if(e.target.id==="histFrom")histFrom=e.target.value;if(e.target.id==="histTo")histTo=e.target.value;if(e.target.id==="histRoute"){routeFilter=e.target.value;renderHistory();}if(e.target.id==="histDriver"){driverFilter=e.target.value;renderHistory();}});
+document.addEventListener("change",e=>{if(e.target.dataset.pick){chosen[e.target.dataset.pick]=e.target.value;if(tab==="today")renderToday();}if(e.target.id==="statRoute"){statRoute=e.target.value;renderStats();}if(e.target.id==="histFrom")histFrom=e.target.value;if(e.target.id==="histTo")histTo=e.target.value;if(e.target.id==="histRoute"){routeFilter=e.target.value;renderHistory();}if(e.target.id==="histDriver"){driverFilter=e.target.value;renderHistory();}});
 document.addEventListener("click",async e=>{const nav=e.target.closest("[data-tab]");if(nav){tab=nav.dataset.tab;render();if(tab==="history")loadHistory();$("scroll").scrollTo({top:0,behavior:"smooth"});return;}const b=e.target.closest("[data-do]");if(!b||busy)return;const act=b.dataset.do,id=b.dataset.id;if(act==="refresh"){refresh();return;}if(act==="start"){const driver=chosen[b.dataset.route];if(!driver)return toast("Επίλεξε πρώτα οδηγό.",true);await doAction("start",{p_route:b.dataset.route,p_driver:driver});return;}if(act==="arrive"){if(!confirm("Να καταγραφεί τώρα η άφιξη;"))return;await doAction("arrive",{p_run:id});return;}if(act==="edit"){editRun(id);return;}if(act==="close-edit"){$("editDialog").close();return;}
 if(act==="save-edit"){const reason=$("editReason").value.trim();if(reason.length<4)return toast("Συμπλήρωσε αιτιολογία (4 χαρακτήρες).",true);try{const p_departure=toUTC($("editStart").value),p_arrival=toUTC($("editEnd").value);if(!p_departure)throw Error("Συμπλήρωσε την αναχώρηση.");const ok=await doAction("correct",{p_run:editing.id,p_driver:$("editDriver").value,p_departure,p_arrival,p_reason:reason});if(ok){$("editDialog").close();if(tab==="history")await loadHistory();}}catch(err){toast(err.message,true);}return;}
 if(act==="remove-run"){const reason=$("editReason").value.trim();if(reason.length<4)return toast("Συμπλήρωσε αιτιολογία διαγραφής.",true);if(!confirm("Να διαγραφεί η καταχώριση; Η ενέργεια καταγράφεται στο ιστορικό αλλαγών."))return;const ok=await doAction("remove",{p_run:editing.id,p_reason:reason});if(ok)$("editDialog").close();return;}
-if(act==="history-load"){if(histFrom>histTo)return toast("Η ημερομηνία Από πρέπει να προηγείται της Έως.",true);loadHistory();return;}
+if(act==="toggle-filters"){historyFiltersOpen=!historyFiltersOpen;renderHistory();return;}
+ if(act==="history-load"){if(histFrom>histTo)return toast("Η ημερομηνία Από πρέπει να προηγείται της Έως.",true);loadHistory();return;}
 if(act==="export"){try{await exportCsv()}catch(err){toast(err.message,true)}return;}
 if(act==="driver-add"){const name=prompt("Όνομα νέου οδηγού:");if(name===null)return;await doAction("driver",{p_id:null,p_name:name,p_active:true});return;}
 if(act==="driver-rename"){const d=state.drivers.find(x=>x.id===id);if(!d)return;const name=prompt("Νέο όνομα οδηγού:",d.name);if(name===null)return;await doAction("driver",{p_id:id,p_name:name,p_active:d.is_active});return;}
