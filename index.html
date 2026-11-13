@@ -103,6 +103,47 @@ button:not(:disabled):active{filter:brightness(1.14)}
 @media(max-width:699px){.driver-choice{min-height:58px;font-size:16px;padding:10px 6px}.driver-instruction{font-size:14px;margin:13px 0 10px!important}}
 @media(max-width:350px){.driver-grid{gap:7px}.driver-choice{font-size:14px;padding:8px 4px}}
 
+/* All routes fit in a vertical, compact list. No horizontally scrolling statistics. */
+html,body{max-width:100%;overflow-x:hidden}
+#main{min-width:0;width:100%}
+.compact-stats-list{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:100%;max-width:680px;margin:0 auto}
+.compact-stat-card{min-width:0;padding:0;overflow:hidden;border-radius:14px}
+.compact-stat-details{min-width:0}
+.compact-stat-head{display:grid;grid-template-columns:minmax(0,1fr) auto 16px;align-items:center;gap:9px;padding:10px 12px;min-height:61px;cursor:pointer;list-style:none;touch-action:manipulation}
+.compact-stat-head::-webkit-details-marker{display:none}
+.compact-stat-head:focus-visible{outline:3px solid #b1d3ff;outline-offset:-3px}
+.compact-stat-title{display:flex;flex-direction:column;gap:3px;min-width:0;overflow-wrap:anywhere}
+.compact-stat-title strong{font-size:16px;line-height:1.25;font-weight:780}
+.compact-stat-title small{font-size:11px;color:var(--sub);line-height:1.35}
+.compact-stat-average{display:flex;flex-direction:column;align-items:flex-end;gap:2px;max-width:115px;white-space:nowrap}
+.compact-stat-average small{font-size:10px;color:var(--sub)}
+.compact-stat-average b{font-size:18px;font-variant-numeric:tabular-nums}
+.compact-stat-chevron{font-size:21px;color:var(--sub);line-height:1;transition:transform .16s}
+.compact-stat-details[open] .compact-stat-chevron{transform:rotate(180deg)}
+.compact-stat-content{min-width:0;padding:0 12px 5px;border-top:1px solid #466e9b;background:#133252}
+.compact-stat-help{font-size:11px;color:var(--sub);padding:10px 0 5px;margin:0!important;line-height:1.4}
+.compact-driver-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;min-height:49px;padding:8px 0;border-bottom:1px solid #375f8d}
+.compact-driver-row:last-child{border-bottom:0}
+.compact-driver-name,.compact-driver-values{display:flex;flex-direction:column;gap:3px;min-width:0}
+.compact-driver-name strong{font-size:14px;overflow-wrap:anywhere;line-height:1.25}
+.compact-driver-name small,.compact-driver-values small{font-size:11px;color:var(--sub);line-height:1.25}
+.compact-driver-values{align-items:flex-end;text-align:right;max-width:115px}
+.compact-driver-values strong{font-size:16px;font-variant-numeric:tabular-nums}
+.compact-driver-values small.good{color:#93ebcf}
+.compact-driver-values small.late{color:#ffdbaf}
+.compact-stat-empty{font-size:12px;color:var(--sub);padding:11px 0;margin:0!important}
+@media(max-width:699px){
+ .compact-stats-list{gap:7px}
+ .compact-stat-head{min-height:56px;padding:9px 10px;gap:7px}
+ .compact-stat-title strong{font-size:15px}
+ .compact-stat-average b{font-size:17px}
+ .compact-stat-content{padding:0 10px 5px}
+ .compact-driver-row{min-height:48px}
+ .compact-driver-name strong{font-size:13px}
+ .compact-driver-values strong{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){.compact-stat-chevron{transition:none}}
+
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 4v2h-7z"/><circle cx="7.5" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></div><h1>Δρομολόγια</h1></header>
@@ -183,14 +224,31 @@ function renderToday(){
  }
  $("main").innerHTML=s+'</div>';
 }
-function renderStats(){const r=statRoute||"A";const base=routeAvg(r);const d=state.stats.filter(x=>x.route_code===r).sort((a,b)=>a.avg_seconds-b.avg_seconds);
-let s='<h2>Στατιστικά οδηγών</h2><p class="meta">Σύγκριση μόνο στο ίδιο δρομολόγιο</p><div class="toolbar"><label class="field">Δρομολόγιο<select id="statRoute">'+state.routes.map(x=>'<option value="'+safe(x.code)+'" '+(x.code===r?'selected':'')+'>'+safe(x.name)+'</option>').join("")+'</select></label></div>';
-if(!base){s+='<div class="empty">Δεν υπάρχουν ακόμη ολοκληρωμένες διαδρομές για σύγκριση.</div>';}else{
-s+='<div class="card summary">Μέσος χρόνος δρομολογίου<br><strong>'+duration(base.avg_seconds)+'</strong><div class="sub">'+base.trips+' ολοκληρωμένες καταγραφές</div></div><section class="card"><div style="overflow-x:auto"><table class="stats-table"><thead><tr><th>Οδηγός</th><th>Τελευταία</th><th>Μ.Ο.</th><th>Διαφορά</th><th>Φορές</th></tr></thead><tbody>';
-for(const row of d){const dif=row.avg_seconds-base.avg_seconds;s+='<tr><td>'+safe(driverName(row.driver_id))+'</td><td>'+duration(row.last_seconds)+'</td><td><b>'+duration(row.avg_seconds)+'</b></td><td class="'+(dif<=0?'good':'late')+'">'+delta(dif)+'</td><td>'+row.trips+'</td></tr>';}
-s+='</tbody></table></div></section><p class="note" style="text-align:center">Η διαφορά συγκρίνει τον μέσο χρόνο κάθε οδηγού με τον μέσο χρόνο όλων των καταγραφών του ίδιου δρομολογίου. Η κίνηση, οι στάσεις και οι συνθήκες επηρεάζουν τις διάρκειες.</p>';
+function renderStats(){
+ let html='<h2>Στατιστικά</h2><p class="meta">Όλα τα δρομολόγια · Πάτησε για χρόνους οδηγών</p><div class="compact-stats-list">';
+ for(const route of state.routes){
+  const base=routeAvg(route.code);
+  const driverRows=state.stats.filter(x=>x.route_code===route.code).sort((a,b)=>a.avg_seconds-b.avg_seconds);
+  const trips=base?.trips||0;
+  html+='<section class="card compact-stat-card"><details name="route-stats" class="compact-stat-details"><summary class="compact-stat-head">';
+  html+='<span class="compact-stat-title"><strong>'+safe(route.name)+'</strong><small>'+trips+' ολοκληρωμέν'+(trips===1?'η':'ες')+' διαδρομ'+(trips===1?'ή':'ές')+'</small></span>';
+  html+='<span class="compact-stat-average"><small>Μέσος χρόνος</small><b>'+duration(base?.avg_seconds)+'</b></span>';
+  html+='<span class="compact-stat-chevron" aria-hidden="true">⌄</span></summary><div class="compact-stat-content">';
+  if(!driverRows.length){
+   html+='<p class="compact-stat-empty">Δεν υπάρχουν ακόμη ολοκληρωμένες διαδρομές.</p>';
+  }else{
+   html+='<p class="compact-stat-help">Μ.Ο. οδηγού · Σύγκριση με το δρομολόγιο</p>';
+   for(const row of driverRows){
+    const diff=row.avg_seconds-base.avg_seconds;
+    html+='<div class="compact-driver-row"><span class="compact-driver-name"><strong>'+safe(driverName(row.driver_id))+'</strong><small>Τελευταία '+duration(row.last_seconds)+' · '+row.trips+' φορ'+(row.trips===1?'ά':'ές')+'</small></span>';
+    html+='<span class="compact-driver-values"><strong>'+duration(row.avg_seconds)+'</strong><small class="'+(diff<=0?'good':'late')+'">'+delta(diff)+' από Μ.Ο.</small></span></div>';
+   }
+  }
+  html+='</div></details></section>';
+ }
+ if(!state.routes.length)html+='<div class="empty">Δεν υπάρχουν δρομολόγια.</div>';
+ $("main").innerHTML=html+'</div>';
 }
-$("main").innerHTML=s;}
 function renderHistory(){
  let s='<h2>Ιστορικό</h2><p class="meta">'+dayLabel(histFrom)+' – '+dayLabel(histTo)+'</p>';
  s+='<div class="action-row history-tools"><button class="btn secondary" data-do="toggle-filters" aria-expanded="'+historyFiltersOpen+'">'+(historyFiltersOpen?"Κλείσιμο φίλτρων":"Φίλτρα · Εξαγωγή CSV")+'</button></div>';
