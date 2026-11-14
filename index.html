@@ -196,6 +196,20 @@ html,body{max-width:100%;overflow-x:hidden}
 .stats-route-compare>small{grid-column:1/-1;font-size:11px;color:var(--sub)}
 @media(max-width:400px){.stats-day-trip{grid-template-columns:minmax(0,1fr) auto;gap:3px 8px}.stats-day-trip small{grid-column:1/-1;text-align:left}}
 
+
+.stats-record-line{display:grid;grid-template-columns:minmax(0,1fr) minmax(105px,35%);gap:7px;margin:6px 0;align-items:stretch}
+.stats-record-main,.stats-record-diff{border:1px solid #4b78a9;border-radius:10px;padding:8px 9px;background:#204675;min-width:0}
+.stats-record-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center}
+.stats-record-main strong{font-size:12px;overflow-wrap:anywhere}
+.stats-record-main b{font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stats-record-main small{grid-column:1/-1;font-size:10px;color:var(--sub)}
+.stats-record-diff{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:3px}
+.stats-record-diff strong{font-size:16px;font-variant-numeric:tabular-nums}
+.stats-record-diff small{font-size:9px;color:var(--sub);line-height:1.2}
+.stats-record-diff.good{border-color:#3e9d82;background:#164e49;color:#b5f7df}
+.stats-record-diff.late{border-color:#a88053;background:#56412e;color:#ffdbaf}
+@media(max-width:390px){.stats-record-line{grid-template-columns:minmax(0,1fr) 105px;gap:5px}.stats-record-main,.stats-record-diff{padding:7px}.stats-record-main{grid-template-columns:1fr}.stats-record-main b{font-size:14px}}
+
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 4v2h-7z"/><circle cx="7.5" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></div><h1>Δρομολόγια</h1></header>
@@ -227,7 +241,7 @@ let tab="today",busy=false,editing=null,historyRows=[],historyLoaded=false;
 let histFrom="",histTo="",routeFilter="",driverFilter="",statRoute="A",historyFiltersOpen=false;
 
 
-let statsHistory=[],priorStatsHistory=[],statsBaselines={},statsHistoryReady=false,statsHistoryLoading=false,statsHistoryAt=0,statsOpenDriver="";
+let statsHistory=[],priorStatsHistory=[],statsBaselines={},statsPersonalBests={},statsHistoryReady=false,statsHistoryLoading=false,statsHistoryAt=0,statsOpenDriver="";
 let statsMonth=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Athens",year:"numeric",month:"2-digit"}).format(new Date()).slice(0,7);
 const statsMonthLabel=ym=>new Intl.DateTimeFormat("el-GR",{month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(ym+"-15T12:00:00Z"));
 const monthAdjacent=(month,delta)=>{const d=new Date(month+"-15T12:00:00Z");d.setUTCMonth(d.getUTCMonth()+delta);return d.toISOString().slice(0,7);};
@@ -251,7 +265,7 @@ async function loadStatsHistory(force=false){
  try{
   const [current,previous,baselineData]=await Promise.all([fetchStatsMonth(month),fetchStatsMonth(monthAdjacent(month,-1)),fetch("https://oikcdjnxkmgrpyedxera.supabase.co/functions/v1/douleia-route-baselines",{cache:"no-store"}).then(async r=>{if(!r.ok)throw Error("Δεν φορτώθηκε ο αρχικός χρόνος.");return r.json();})]);
   if(statsMonth!==month)return;
-  statsHistory=current;priorStatsHistory=previous;statsBaselines=Object.fromEntries((baselineData.baselines||[]).map(b=>[b.route_code,b]));statsHistoryReady=true;statsHistoryAt=Date.now();
+  statsHistory=current;priorStatsHistory=previous;statsBaselines=Object.fromEntries((baselineData.baselines||[]).map(b=>[b.route_code,b]));statsPersonalBests=Object.fromEntries((baselineData.personalBests||[]).map(b=>[b.driver_id+"|"+b.route_code,b]));statsHistoryReady=true;statsHistoryAt=Date.now();
  }catch(e){statsHistoryReady=false;console.warn("Στατιστικά μήνα:",e);if(tab==="stats")toast("Δεν φορτώθηκαν τα μηνιαία στατιστικά.",true);}
  finally{statsHistoryLoading=false;if(tab==="stats")renderStats();}
 }
@@ -333,7 +347,7 @@ function renderStats(){
  const drivers=state.drivers.filter(d=>d.is_active||all.some(r=>r.driver_id===d.id));
  drivers.sort((a,b)=>a.name.localeCompare(b.name,"el"));
  let html='<h2>Μηνιαία στατιστικά</h2><div class="stats-month-nav"><button type="button" class="mini-btn" data-stats-month="-1" aria-label="Προηγούμενος μήνας">‹</button><strong>'+safe(statsMonthLabel(statsMonth))+'</strong><button type="button" class="mini-btn" data-stats-month="1" aria-label="Επόμενος μήνας">›</button></div>';
- html+='<p class="meta">Ημερολόγιο οδηγών · Διάρκεια και ± από την πρώτη καταχώριση</p>';
+ html+='<p class="meta">Ημερολόγιο · Κάθε καταγραφή και διαφορά από προσωπικό ρεκόρ</p>';
  if(!statsHistoryReady)html+='<div class="empty">'+(statsHistoryLoading?'Φόρτωση στατιστικών…':'Δεν υπάρχουν διαθέσιμα στοιχεία.')+'</div>';
  if(statsHistoryReady){
   html+='<div class="stats-overview"><span><b>'+all.length+'</b><small>Διαδρομές</small></span><span><b>'+duration(statMean(all))+'</b><small>Μ.Ο. όλων</small></span><span><b>'+new Set(all.map(r=>r.driver_id)).size+'</b><small>Οδηγοί</small></span></div>';
@@ -373,20 +387,18 @@ function renderStats(){
    html+='<div class="stats-comparison">Σε σχέση με προηγούμενο μήνα (ίδια δρομολόγια): <b>'+(priorMatched==null?'Χωρίς αρκετές αναφορές':statGap(matchedNow,priorMatched))+'</b></div>';
    html+='<div class="stats-comparison">Τελευταίες 3 έναντι προηγούμενων 3 (όλες οι διαδρομές): <b>'+(fasterTrend===null?'Χρειάζονται 6 καταγραφές':statGap(statMean(runs.slice(0,3)),statMean(runs.slice(3,6))))+'</b></div>';
 
-   html+='<div class="stats-diary-title">Ημερολόγιο μήνα <small>Κάθε ημέρα · κάθε διαδρομή</small></div>';
+
+   html+='<div class="stats-diary-title">Ημερολόγιο μήνα <small>Καλύτερος χρόνος του οδηγού ως βάση</small></div>';
    const daily=new Map();
    for(const run of runs){if(!daily.has(run.service_date))daily.set(run.service_date,[]);daily.get(run.service_date).push(run);}
    for(const [date,dayRuns] of daily){
-    const total=dayRuns.reduce((sum,r)=>sum+lengthSecs(r),0);
-    html+='<div class="stats-day"><div class="stats-day-head"><strong>'+safe(statWeekday(date))+' '+dayLabel(date)+'</strong><span>'+dayRuns.length+' '+(dayRuns.length===1?'δρομολόγιο':'δρομολόγια')+' · <b>Σύνολο '+duration(total)+'</b></span></div>';
-    for(const run of dayRuns){
-      const code=run.route_code,own=runs.filter(r=>r.route_code===code),ownAvg=statMean(own);
-      const baseline=statsBaselines[code]?.baseline_seconds??null;
-      const deviation=baseline===null?null:lengthSecs(run)-baseline;
-      const slower=deviation!==null&&deviation>=600,deltaText=statGap(lengthSecs(run),baseline);
-      html+='<div class="stats-day-trip"><span>'+safe(routeName(code))+'</span><strong>'+duration(lengthSecs(run))+'</strong><small class="'+(slower?'late':'muted')+'">'+(baseline===null?'Χωρίς βάση':(statsBaselines[code]?.run_id===run.id?'Αρχική εγγραφή':deltaText+' από 1η'))+(slower?' · πιο αργά':'')+'</small></div>';
-    }
-    html+='</div>';
+     for(const run of dayRuns){
+       const best=statsPersonalBests[driver.id+"|"+run.route_code]?.best_seconds??null;
+       const actual=lengthSecs(run),diff=best===null?null:actual-best;
+       const label=best===null?"—":Math.abs(diff)<30?"Ρεκόρ":"+"+Math.round(diff/60)+"λ";
+       const labelClass=best!==null&&diff>=600?"late":diff<30?"good":"muted";
+       html+='<div class="stats-record-line"><div class="stats-record-main"><strong>'+safe(statWeekday(run.service_date))+' '+dayLabel(run.service_date)+'</strong><b>'+duration(actual)+'</b><small>'+safe(routeName(run.route_code))+'</small></div><div class="stats-record-diff '+labelClass+'"><strong>'+label+'</strong><small>από προσωπικό ρεκόρ</small></div></div>';
+     }
    }
    html+='<div class="stats-month-end"><strong>Μηνιαίος μέσος όρος</strong><b>'+duration(mean)+'</b><small>'+runs.length+' διαδρομές σε '+daily.size+' ημέρες · Σύνολο '+duration(runs.reduce((sum,r)=>sum+lengthSecs(r),0))+'</small></div>';
    html+='<div class="stats-diary-title">Σύγκριση ίδιων δρομολογίων</div>';
@@ -398,7 +410,7 @@ function renderStats(){
   }
   html+='</div></details></section>';
  }
- html+='</div><p class="note stats-note">Οι συγκρίσεις γίνονται ανά ίδιο δρομολόγιο. Ο αρχικός χρόνος κάθε δρομολογίου είναι η πρώτη ολοκληρωμένη καταχώρισή του. Η ένδειξη «πιο αργά» σημαίνει τουλάχιστον 10 λεπτά πάνω από αυτόν τον αρχικό χρόνο, όχι ευθύνη του οδηγού. Κίνηση, φόρτος, στάσεις και συνθήκες μπορούν να επηρεάσουν τον χρόνο.</p>';
+ html+='</div><p class="note stats-note">Οι προσωπικοί χρόνοι συγκρίνονται με τον ταχύτερο χρόνο του ίδιου οδηγού στο ίδιο δρομολόγιο, από όλο το ιστορικό. Οι συνολικές συγκρίσεις με άλλους οδηγούς γίνονται στο ίδιο δρομολόγιο. Η διαφορά δείχνει χρόνο και όχι ευθύνη του οδηγού. Κίνηση, φόρτος, στάσεις και συνθήκες μπορούν να επηρεάσουν τον χρόνο.</p>';
  $("main").innerHTML=html;
 }
 
