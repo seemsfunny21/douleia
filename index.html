@@ -174,6 +174,38 @@ const $=id=>document.getElementById(id);
 let state={routes:[],drivers:[],today:[],stats:[],routeStats:[],todayDate:""};
 let tab="today",busy=false,editing=null,historyRows=[],historyLoaded=false;
 let histFrom="",histTo="",routeFilter="",driverFilter="",statRoute="A",historyFiltersOpen=false;
+
+let statsHistory=[],statsHistoryReady=false,statsHistoryLoading=false,statsHistoryAt=0;
+async function loadStatsHistory(force=false){
+ if(statsHistoryLoading||(!force&&statsHistoryReady&&Date.now()-statsHistoryAt<300000))return;
+ statsHistoryLoading=true;
+ try{
+  const end=localDay(),first=new Date(end+"T12:00:00Z");first.setUTCDate(first.getUTCDate()-180);
+  const from=first.toISOString().slice(0,10);let rows=[],offset=0;
+  while(true){
+   const data=await request("history",null,{from,to:end,offset,limit:500});
+   rows.push(...data.rows);
+   if(data.rows.length<500)break;
+   offset+=500;if(offset>25000)break;
+  }
+  statsHistory=rows;statsHistoryReady=true;statsHistoryAt=Date.now();
+ }catch(e){statsHistoryReady=false;console.warn("Στατιστικά εξαμήνου:",e);}
+ finally{statsHistoryLoading=false;if(tab==="stats")renderStats();}
+}
+function extraRouteStats(code){
+ const rows=statsHistory.filter(r=>r.route_code===code&&r.arrival_at&&r.departure_at)
+   .sort((a,b)=>Date.parse(b.departure_at)-Date.parse(a.departure_at));
+ const predicted=rows.filter(r=>r.estimated_return_at&&Number.isFinite(Date.parse(r.estimated_return_at)));
+ const accuracy=predicted.length?Math.round(100*predicted.filter(r=>Math.abs(Date.parse(r.arrival_at)-Date.parse(r.estimated_return_at))<=600000).length/predicted.length):null;
+ const times=rows.map(r=>lengthSecs(r)).filter(x=>x!=null&&Number.isFinite(x)&&x>0);
+ let trend=null;
+ if(times.length>=10){
+   const avg=a=>a.reduce((sum,v)=>sum+v,0)/a.length;
+   trend=Math.round((avg(times.slice(0,5))-avg(times.slice(5,10)))/60);
+ }
+ return {accuracy,trend};
+}
+
 const apiBase="https://oikcdjnxkmgrpyedxera.supabase.co/functions/v1/dromologia/";
 const safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const localDay=()=>new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Athens",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
@@ -227,13 +259,16 @@ function renderToday(){
  $("main").innerHTML=s+'</div>';
 }
 function renderStats(){
- let html='<h2>Στατιστικά</h2><p class="meta">Όλα τα δρομολόγια · Πάτησε για χρόνους οδηγών</p><div class="compact-stats-list">';
+ let html='<h2>Στατιστικά</h2><p class="meta">Μέσος χρόνος · Ακρίβεια και τάση 6μήνου · Πάτησε για οδηγούς</p><div class="compact-stats-list">';
  for(const route of state.routes){
   const base=routeAvg(route.code);
   const driverRows=state.stats.filter(x=>x.route_code===route.code).sort((a,b)=>a.avg_seconds-b.avg_seconds);
   const trips=base?.trips||0;
+  const extra=statsHistoryReady?extraRouteStats(route.code):null;
+  const accuracy=extra?.accuracy==null?"—":extra.accuracy+"%";
+  const trend=extra?.trend==null?"—":(extra.trend===0?"±0λ":(extra.trend>0?"+":"−")+Math.abs(extra.trend)+"λ");
   html+='<section class="card compact-stat-card"><details name="route-stats" class="compact-stat-details"><summary class="compact-stat-head">';
-  html+='<span class="compact-stat-title"><strong>'+safe(route.name)+'</strong><small>'+trips+' ολοκληρωμέν'+(trips===1?'η':'ες')+' διαδρομ'+(trips===1?'ή':'ές')+'</small></span>';
+  html+='<span class="compact-stat-title"><strong>'+safe(route.name)+'</strong><small>'+trips+' διαδρομές · Ακρίβεια ±10λ '+accuracy+' · Τάση '+trend+'</small></span>';
   html+='<span class="compact-stat-average"><small>Μέσος χρόνος</small><b>'+duration(base?.avg_seconds)+'</b></span>';
   html+='<span class="compact-stat-chevron" aria-hidden="true">⌄</span></summary><div class="compact-stat-content">';
   if(!driverRows.length){
@@ -278,7 +313,7 @@ function toUTC(local){if(!local)return null;const target=Date.parse(local+":00Z"
 function editRun(id){editing=state.today.find(x=>x.id===id)||historyRows.find(x=>x.id===id);if(!editing)return toast("Δεν βρέθηκε το δρομολόγιο.",true);$("editDriver").innerHTML=state.drivers.map(d=>'<option value="'+safe(d.id)+'">'+safe(d.name)+'</option>').join("");$("editDriver").value=editing.driver_id;$("editStart").value=toAthensLocal(editing.departure_at);$("editEnd").value=toAthensLocal(editing.arrival_at);$("editReason").value="";$("editDialog").showModal();}
 async function exportCsv(){const rows=await getAllHistory(true);const picked=rows.filter(x=>(!routeFilter||x.route_code===routeFilter)&&(!driverFilter||x.driver_id===driverFilter));const quote=s=>'"'+String(s??"").replace(/"/g,'""')+'"';const csv=[["Ημερομηνία","Δρομολόγιο","Οδηγός","Αναχώρηση","Άφιξη","Διάρκεια (λεπτά)","Εκτίμηση επιστροφής"].map(quote).join(";")];for(const r of picked)csv.push([r.service_date,routeName(r.route_code),driverName(r.driver_id),clock(r.departure_at),clock(r.arrival_at),lengthSecs(r)==null?"":Math.round(lengthSecs(r)/60),clock(r.estimated_return_at)].map(quote).join(";"));const blob=new Blob(["\uFEFF"+csv.join("\r\n")],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="dromologia_"+histFrom+"_"+histTo+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);toast("Εξαγωγή "+picked.length+" καταχωρίσεων.");}
 document.addEventListener("change",e=>{if(e.target.id==="statRoute"){statRoute=e.target.value;renderStats();}if(e.target.id==="histFrom")histFrom=e.target.value;if(e.target.id==="histTo")histTo=e.target.value;if(e.target.id==="histRoute"){routeFilter=e.target.value;renderHistory();}if(e.target.id==="histDriver"){driverFilter=e.target.value;renderHistory();}});
-document.addEventListener("click",async e=>{const nav=e.target.closest("[data-tab]");if(nav){tab=nav.dataset.tab;render();if(tab==="history")loadHistory();$("scroll").scrollTo({top:0,behavior:"smooth"});return;}const b=e.target.closest("[data-do]");if(!b||busy)return;const act=b.dataset.do,id=b.dataset.id;if(act==="refresh"){refresh();return;}if(act==="start-driver"){const route=b.dataset.route,driver=b.dataset.driver;if(!state.routes.some(r=>r.code===route)||!state.drivers.some(d=>d.id===driver&&d.is_active)||state.today.some(r=>r.route_code===route))return toast("Το δρομολόγιο δεν είναι διαθέσιμο για αναχώρηση.",true);await doAction("start",{p_route:route,p_driver:driver});return;}if(act==="arrive"){if(!confirm("Να καταγραφεί τώρα η άφιξη;"))return;await doAction("arrive",{p_run:id});return;}if(act==="edit"){editRun(id);return;}if(act==="close-edit"){$("editDialog").close();return;}
+document.addEventListener("click",async e=>{const nav=e.target.closest("[data-tab]");if(nav){tab=nav.dataset.tab;render();if(tab==="history")loadHistory();if(tab==="stats")loadStatsHistory();$("scroll").scrollTo({top:0,behavior:"smooth"});return;}const b=e.target.closest("[data-do]");if(!b||busy)return;const act=b.dataset.do,id=b.dataset.id;if(act==="refresh"){refresh();return;}if(act==="start-driver"){const route=b.dataset.route,driver=b.dataset.driver;if(!state.routes.some(r=>r.code===route)||!state.drivers.some(d=>d.id===driver&&d.is_active)||state.today.some(r=>r.route_code===route))return toast("Το δρομολόγιο δεν είναι διαθέσιμο για αναχώρηση.",true);await doAction("start",{p_route:route,p_driver:driver});return;}if(act==="arrive"){if(!confirm("Να καταγραφεί τώρα η άφιξη;"))return;await doAction("arrive",{p_run:id});return;}if(act==="edit"){editRun(id);return;}if(act==="close-edit"){$("editDialog").close();return;}
 if(act==="save-edit"){const reason=$("editReason").value.trim();if(reason.length<4)return toast("Συμπλήρωσε αιτιολογία (4 χαρακτήρες).",true);try{const p_departure=toUTC($("editStart").value),p_arrival=toUTC($("editEnd").value);if(!p_departure)throw Error("Συμπλήρωσε την αναχώρηση.");const ok=await doAction("correct",{p_run:editing.id,p_driver:$("editDriver").value,p_departure,p_arrival,p_reason:reason});if(ok){$("editDialog").close();if(tab==="history")await loadHistory();}}catch(err){toast(err.message,true);}return;}
 if(act==="remove-run"){const reason=$("editReason").value.trim();if(reason.length<4)return toast("Συμπλήρωσε αιτιολογία διαγραφής.",true);if(!confirm("Να διαγραφεί η καταχώριση; Η ενέργεια καταγράφεται στο ιστορικό αλλαγών."))return;const ok=await doAction("remove",{p_run:editing.id,p_reason:reason});if(ok)$("editDialog").close();return;}
 if(act==="toggle-filters"){historyFiltersOpen=!historyFiltersOpen;renderHistory();return;}
