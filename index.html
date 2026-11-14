@@ -230,7 +230,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .stats-route-mini b{font-size:15px;white-space:nowrap}
 .stats-driver-entry{border:1px solid #426f9e;border-radius:11px;background:#1b426f;overflow:hidden;margin-top:7px}
 .stats-driver-entry .stats-driver-head{padding:10px}
-.stats-driver-entry .stats-driver-body{padding:10px}
+.stats-driver-entry .stats-driver-body{padding:9px}
 .stats-driver-entry .stats-driver-average small{max-width:135px;text-align:right;white-space:normal}
 .stats-driver-compact{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--sub)}
 .stats-driver-compact b{color:#fff}
@@ -271,7 +271,7 @@ let tab="today",busy=false,editing=null,historyRows=[],historyLoaded=false;
 let histFrom="",histTo="",routeFilter="",driverFilter="",statRoute="A",historyFiltersOpen=false;
 
 
-let statsHistory=[],priorStatsHistory=[],statsBaselines={},statsPersonalBests={},statsRouteBests={},statsHistoryReady=false,statsHistoryLoading=false,statsHistoryAt=0,statsOpenRoute="",statsOpenDriver="";
+let statsHistory=[],statsRouteBests={},statsHistoryReady=false,statsHistoryLoading=false,statsHistoryAt=0,statsOpenRoute="",statsOpenDriver="";
 let statsMonth=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Athens",year:"numeric",month:"2-digit"}).format(new Date()).slice(0,7);
 const statsMonthLabel=ym=>new Intl.DateTimeFormat("el-GR",{month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(ym+"-15T12:00:00Z"));
 const monthAdjacent=(month,delta)=>{const d=new Date(month+"-15T12:00:00Z");d.setUTCMonth(d.getUTCMonth()+delta);return d.toISOString().slice(0,7);};
@@ -293,16 +293,16 @@ async function loadStatsHistory(force=false){
  statsHistoryLoading=true;
  const month=statsMonth;
  try{
-  const [current,previous,baselineData]=await Promise.all([fetchStatsMonth(month),fetchStatsMonth(monthAdjacent(month,-1)),fetch("https://oikcdjnxkmgrpyedxera.supabase.co/functions/v1/douleia-route-baselines",{cache:"no-store"}).then(async r=>{if(!r.ok)throw Error("Δεν φορτώθηκε ο αρχικός χρόνος.");return r.json();})]);
+  const [current,baselineData]=await Promise.all([fetchStatsMonth(month),fetch("https://oikcdjnxkmgrpyedxera.supabase.co/functions/v1/douleia-route-baselines",{cache:"no-store"}).then(async r=>{if(!r.ok)throw Error("Δεν φορτώθηκε το ρεκόρ.");return r.json();})]);
   if(statsMonth!==month)return;
-  statsHistory=current;priorStatsHistory=previous;statsBaselines=Object.fromEntries((baselineData.baselines||[]).map(b=>[b.route_code,b]));statsPersonalBests=Object.fromEntries((baselineData.personalBests||[]).map(b=>[b.driver_id+"|"+b.route_code,b]));statsRouteBests=Object.fromEntries((baselineData.routeBests||[]).map(b=>[b.route_code,b]));statsHistoryReady=true;statsHistoryAt=Date.now();
+  statsHistory=current;statsRouteBests=Object.fromEntries((baselineData.routeBests||[]).map(b=>[b.route_code,b]));statsHistoryReady=true;statsHistoryAt=Date.now();
  }catch(e){statsHistoryReady=false;console.warn("Στατιστικά μήνα:",e);if(tab==="stats")toast("Δεν φορτώθηκαν τα μηνιαία στατιστικά.",true);}
  finally{statsHistoryLoading=false;if(tab==="stats")renderStats();}
 }
 function changeStatsMonth(delta){
  if(statsHistoryLoading)return;
  statsMonth=monthAdjacent(statsMonth,delta);
- statsHistoryReady=false;statsHistory=[];priorStatsHistory=[];
+ statsHistoryReady=false;statsHistory=[];
  renderStats();loadStatsHistory(true);
 }
 const completedStatsRows=rows=>rows.filter(r=>r.arrival_at&&r.departure_at&&Number.isFinite(lengthSecs(r))&&lengthSecs(r)>0);
@@ -372,72 +372,40 @@ function renderToday(){
 
 function renderStats(){
  const all=statsHistoryReady?completedStatsRows(statsHistory):[];
- const previous=statsHistoryReady?completedStatsRows(priorStatsHistory):[];
- let html='<h2>Στατιστικά δρομολογίων</h2><div class="stats-month-nav"><button type="button" class="mini-btn" data-stats-month="-1" aria-label="Προηγούμενος μήνας">‹</button><strong>'+safe(statsMonthLabel(statsMonth))+'</strong><button type="button" class="mini-btn" data-stats-month="1" aria-label="Επόμενος μήνας">›</button></div>';
+ let html='<h2>Στατιστικά</h2><div class="stats-month-nav"><button type="button" class="mini-btn" data-stats-month="-1" aria-label="Προηγούμενος μήνας">‹</button><strong>'+safe(statsMonthLabel(statsMonth))+'</strong><button type="button" class="mini-btn" data-stats-month="1" aria-label="Επόμενος μήνας">›</button></div>';
  if(!statsHistoryReady){
-  html+='<div class="empty">'+(statsHistoryLoading?'Φόρτωση στατιστικών…':'Δεν υπάρχουν διαθέσιμα στοιχεία.')+'</div>';
-  $("main").innerHTML=html;
-  return;
+  html+='<div class="empty">'+(statsHistoryLoading?'Φόρτωση…':'Δεν υπάρχουν διαθέσιμα στοιχεία.')+'</div>';
+  $("main").innerHTML=html;return;
  }
  html+='<div class="compact-stats-list">';
  for(const route of state.routes){
-  const runs=all.filter(r=>r.route_code===route.code).sort((x,y)=>Date.parse(y.departure_at)-Date.parse(x.departure_at));
-  const prevRuns=previous.filter(r=>r.route_code===route.code);
+  const runs=all.filter(r=>r.route_code===route.code).sort((a,b)=>Date.parse(b.departure_at)-Date.parse(a.departure_at));
   const best=statsRouteBests[route.code]?.best_seconds??null;
-  const recordCount=statsRouteBests[route.code]?.completed_count??0;
-  const mean=statMean(runs);
-  const ids=[...new Set(runs.map(r=>r.driver_id))].sort((x,y)=>{
-   const byTime=statMean(runs.filter(r=>r.driver_id===x))-statMean(runs.filter(r=>r.driver_id===y));
-   return byTime||driverName(x).localeCompare(driverName(y),"el");
-  });
+  const count=statsRouteBests[route.code]?.completed_count??0;
+  const ids=[...new Set(runs.map(r=>r.driver_id))].sort((a,b)=>driverName(a).localeCompare(driverName(b),"el"));
   html+='<section class="card stats-route-card"><details name="monthly-route" class="stats-route-details" data-route-code="'+safe(route.code)+'" '+(statsOpenRoute===route.code?'open':'')+'>';
-  html+='<summary class="stats-route-head"><span class="stats-route-name"><strong>'+safe(route.name)+'</strong><small>'+runs.length+' '+statCountWord(runs.length)+' · Μ.Ο. '+duration(mean)+'</small></span>';
-  html+='<span class="stats-route-best"><small>Ρεκόρ</small><b>'+duration(best)+'</b></span><span class="compact-stat-chevron" aria-hidden="true">⌄</span></summary>';
+  html+='<summary class="stats-route-head"><span class="stats-route-name"><strong>'+safe(route.name)+'</strong><small>'+runs.length+' '+statCountWord(runs.length)+' · Μ.Ο. '+duration(statMean(runs))+'</small></span><span class="stats-route-best"><small>Ρεκόρ</small><b>'+duration(best)+'</b></span><span class="compact-stat-chevron" aria-hidden="true">⌄</span></summary>';
   html+='<div class="stats-route-body">';
-  if(!runs.length){
-   html+='<p class="compact-stat-empty">Δεν υπάρχουν καταγραφές τον επιλεγμένο μήνα.</p>';
-  }else{
-   const fastest=Math.min(...runs.map(lengthSecs));
-   const slowest=Math.max(...runs.map(lengthSecs));
-   html+='<div class="stats-route-mini"><span><small>Ταχύτερη μήνα</small><b>'+duration(fastest)+'</b></span><span><small>Βραδύτερη μήνα</small><b>'+duration(slowest)+'</b></span><span><small>Οδηγοί</small><b>'+ids.length+'</b></span></div>';
-   for(const id of ids){
-    const driverRuns=runs.filter(r=>r.driver_id===id);
-    const driverMean=statMean(driverRuns);
-    const driverBest=Math.min(...driverRuns.map(lengthSecs));
-    const driverWorst=Math.max(...driverRuns.map(lengthSecs));
-    const priorDriver=prevRuns.filter(r=>r.driver_id===id);
-    const peerRuns=runs.filter(r=>r.driver_id!==id);
-    const peerAvg=statMean(peerRuns);
-    const predictions=driverRuns.filter(r=>r.estimated_return_at&&Number.isFinite(Date.parse(r.estimated_return_at)));
-    const accurate=predictions.filter(r=>Math.abs(Date.parse(r.arrival_at)-Date.parse(r.estimated_return_at))<=600000);
-    const driverKey=route.code+"|"+id;
-    html+='<div class="stats-driver-entry"><details class="stats-driver-details" data-route-code="'+safe(route.code)+'" data-driver-id="'+safe(id)+'" '+(statsOpenDriver===driverKey?'open':'')+'>';
-    html+='<summary class="stats-driver-head"><span class="stats-driver-name"><strong>'+safe(driverName(id))+'</strong><small>'+driverRuns.length+' '+statCountWord(driverRuns.length)+'</small></span>';
-    html+='<span class="stats-driver-average"><small>Μ.Ο. στο '+safe(route.name)+'</small><b>'+duration(driverMean)+'</b></span><span class="compact-stat-chevron" aria-hidden="true">⌄</span></summary>';
-    html+='<div class="stats-driver-body">';
-    html+='<div class="stats-driver-compact"><span>Καλύτερη <b>'+duration(driverBest)+'</b></span><span>Βραδύτερη <b>'+duration(driverWorst)+'</b></span></div>';
-    if(peerRuns.length)html+='<div class="stats-comparison">Από Μ.Ο. άλλων οδηγών: <b>'+statGap(driverMean,peerAvg)+'</b> <small>('+peerRuns.length+' καταγραφές)</small></div>';
-    if(priorDriver.length)html+='<div class="stats-comparison">Από προηγ. μήνα: <b>'+statGap(driverMean,statMean(priorDriver))+'</b></div>';
-    if(predictions.length)html+='<div class="stats-comparison">Ακρίβεια ±10λ: <b>'+Math.round(100*accurate.length/predictions.length)+'%</b></div>';
-    html+='<div class="stats-diary-title">Ημερολόγιο</div>';
-    for(const run of driverRuns){
-     const actual=lengthSecs(run);
-     const diff=best==null?null:actual-best;
-     const onlyOne=recordCount===1;
-     const label=diff==null?"—":onlyOne?"Πρώτη φορά":diff===0?"Ρεκόρ":diff<60?"+<1λ":"+"+Math.round(diff/60)+"λ";
-     const labelClass=diff!=null&&diff>=600?"late":diff===0?"good":"muted";
-     html+='<div class="stats-record-line"><div class="stats-record-main"><strong>'+safe(statWeekday(run.service_date))+' '+dayLabel(run.service_date)+'</strong><b>'+duration(actual)+'</b></div>';
-     html+='<div class="stats-record-diff '+labelClass+'"><strong>'+label.replace("+<1λ","+&lt;1λ")+'</strong><small>'+(onlyOne?'':'από ρεκόρ')+'</small></div></div>';
-    }
-    html+='<div class="stats-month-end"><strong>Σύνολο μήνα</strong><b>'+duration(driverRuns.reduce((total,r)=>total+lengthSecs(r),0))+'</b><small>'+driverRuns.length+' καταγραφές · Μ.Ο. '+duration(driverMean)+'</small></div>';
-    html+='</div></details></div>';
+  if(!runs.length)html+='<p class="compact-stat-empty">Χωρίς καταγραφές αυτόν τον μήνα.</p>';
+  else for(const id of ids){
+   const driverRuns=runs.filter(r=>r.driver_id===id);
+   const driverAvg=statMean(driverRuns);
+   const driverKey=route.code+"|"+id;
+   html+='<div class="stats-driver-entry"><details class="stats-driver-details" data-route-code="'+safe(route.code)+'" data-driver-id="'+safe(id)+'" '+(statsOpenDriver===driverKey?'open':'')+'>';
+   html+='<summary class="stats-driver-head"><span class="stats-driver-name"><strong>'+safe(driverName(id))+'</strong><small>'+driverRuns.length+' '+statCountWord(driverRuns.length)+'</small></span><span class="stats-driver-average"><small>Μ.Ο.</small><b>'+duration(driverAvg)+'</b></span><span class="compact-stat-chevron" aria-hidden="true">⌄</span></summary>';
+   html+='<div class="stats-driver-body">';
+   for(const run of driverRuns){
+    const actual=lengthSecs(run),diff=best==null?null:actual-best;
+    const label=diff==null?"—":count===1?"Πρώτη φορά":diff===0?"Ρεκόρ":diff<60?"+&lt;1λ":"+"+Math.round(diff/60)+"λ";
+    const color=diff==null?"":diff===0?"good":diff>=600?"late":"muted";
+    html+='<div class="stats-record-line"><div class="stats-record-main"><strong>'+safe(statWeekday(run.service_date))+' '+dayLabel(run.service_date)+'</strong><b>'+duration(actual)+'</b></div><div class="stats-record-diff '+color+'"><strong>'+label+'</strong></div></div>';
    }
+   html+='</div></details></div>';
   }
   html+='</div></details></section>';
  }
  if(!state.routes.length)html+='<div class="empty">Δεν υπάρχουν δρομολόγια.</div>';
- html+='</div>';
- $("main").innerHTML=html;
+ $("main").innerHTML=html+'</div>';
 }
 
 function renderHistory(){
@@ -565,7 +533,7 @@ document.addEventListener("click",event=>{
  if(value!==-1&&value!==1)return;
  if(statsHistoryLoading)return;
  statsMonth=monthAdjacent(statsMonth,value);
- statsHistoryReady=false;statsHistory=[];priorStatsHistory=[];statsOpenDriver="";
+ statsHistoryReady=false;statsHistory=[];statsOpenDriver="";
  renderStats();loadStatsHistory(true);
 });
 document.addEventListener("toggle",event=>{
