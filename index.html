@@ -393,11 +393,15 @@ function renderStats(){
    for(const run of runs){if(!daily.has(run.service_date))daily.set(run.service_date,[]);daily.get(run.service_date).push(run);}
    for(const [date,dayRuns] of daily){
      for(const run of dayRuns){
-       const best=statsPersonalBests[driver.id+"|"+run.route_code]?.best_seconds??null;
+       const personalBest=statsPersonalBests[driver.id+"|"+run.route_code];
+       const best=personalBest?.best_seconds??null;
+       const count=personalBest?.completed_count??0;
        const actual=lengthSecs(run),diff=best===null?null:actual-best;
-       const label=best===null?"—":Math.abs(diff)<30?"Ρεκόρ":"+"+Math.round(diff/60)+"λ";
+       const firstOnly=count===1;
+       const label=best===null?"—":firstOnly?"Πρώτη φορά":Math.abs(diff)<30?"Ρεκόρ":"+"+Math.round(diff/60)+"λ";
        const labelClass=best!==null&&diff>=600?"late":diff<30?"good":"muted";
-       html+='<div class="stats-record-line"><div class="stats-record-main"><strong>'+safe(statWeekday(run.service_date))+' '+dayLabel(run.service_date)+'</strong><b>'+duration(actual)+'</b><small>'+safe(routeName(run.route_code))+'</small></div><div class="stats-record-diff '+labelClass+'"><strong>'+label+'</strong><small>από προσωπικό ρεκόρ</small></div></div>';
+       const hint=firstOnly?"Χωρίς προηγούμενη σύγκριση":"από προσωπικό ρεκόρ";
+       html+='<div class="stats-record-line"><div class="stats-record-main"><strong>'+safe(statWeekday(run.service_date))+' '+dayLabel(run.service_date)+'</strong><b>'+duration(actual)+'</b><small>'+safe(routeName(run.route_code))+'</small></div><div class="stats-record-diff '+labelClass+'"><strong>'+label+'</strong><small>'+hint+'</small></div></div>';
      }
    }
    html+='<div class="stats-month-end"><strong>Μηνιαίος μέσος όρος</strong><b>'+duration(mean)+'</b><small>'+runs.length+' διαδρομές σε '+daily.size+' ημέρες · Σύνολο '+duration(runs.reduce((sum,r)=>sum+lengthSecs(r),0))+'</small></div>';
