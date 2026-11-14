@@ -241,7 +241,7 @@ let tab="today",busy=false,editing=null,historyRows=[],historyLoaded=false;
 let histFrom="",histTo="",routeFilter="",driverFilter="",statRoute="A",historyFiltersOpen=false;
 
 
-let statsHistory=[],priorStatsHistory=[],statsBaselines={},statsPersonalBests={},statsHistoryReady=false,statsHistoryLoading=false,statsHistoryAt=0,statsOpenDriver="";
+let statsHistory=[],priorStatsHistory=[],statsBaselines={},statsPersonalBests={},statsRouteBests={},statsHistoryReady=false,statsHistoryLoading=false,statsHistoryAt=0,statsOpenDriver="";
 let statsMonth=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Athens",year:"numeric",month:"2-digit"}).format(new Date()).slice(0,7);
 const statsMonthLabel=ym=>new Intl.DateTimeFormat("el-GR",{month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(ym+"-15T12:00:00Z"));
 const monthAdjacent=(month,delta)=>{const d=new Date(month+"-15T12:00:00Z");d.setUTCMonth(d.getUTCMonth()+delta);return d.toISOString().slice(0,7);};
@@ -265,7 +265,7 @@ async function loadStatsHistory(force=false){
  try{
   const [current,previous,baselineData]=await Promise.all([fetchStatsMonth(month),fetchStatsMonth(monthAdjacent(month,-1)),fetch("https://oikcdjnxkmgrpyedxera.supabase.co/functions/v1/douleia-route-baselines",{cache:"no-store"}).then(async r=>{if(!r.ok)throw Error("Δεν φορτώθηκε ο αρχικός χρόνος.");return r.json();})]);
   if(statsMonth!==month)return;
-  statsHistory=current;priorStatsHistory=previous;statsBaselines=Object.fromEntries((baselineData.baselines||[]).map(b=>[b.route_code,b]));statsPersonalBests=Object.fromEntries((baselineData.personalBests||[]).map(b=>[b.driver_id+"|"+b.route_code,b]));statsHistoryReady=true;statsHistoryAt=Date.now();
+  statsHistory=current;priorStatsHistory=previous;statsBaselines=Object.fromEntries((baselineData.baselines||[]).map(b=>[b.route_code,b]));statsPersonalBests=Object.fromEntries((baselineData.personalBests||[]).map(b=>[b.driver_id+"|"+b.route_code,b]));statsRouteBests=Object.fromEntries((baselineData.routeBests||[]).map(b=>[b.route_code,b]));statsHistoryReady=true;statsHistoryAt=Date.now();
  }catch(e){statsHistoryReady=false;console.warn("Στατιστικά μήνα:",e);if(tab==="stats")toast("Δεν φορτώθηκαν τα μηνιαία στατιστικά.",true);}
  finally{statsHistoryLoading=false;if(tab==="stats")renderStats();}
 }
@@ -347,7 +347,7 @@ function renderStats(){
  const drivers=state.drivers.filter(d=>d.is_active||all.some(r=>r.driver_id===d.id));
  drivers.sort((a,b)=>a.name.localeCompare(b.name,"el"));
  let html='<h2>Μηνιαία στατιστικά</h2><div class="stats-month-nav"><button type="button" class="mini-btn" data-stats-month="-1" aria-label="Προηγούμενος μήνας">‹</button><strong>'+safe(statsMonthLabel(statsMonth))+'</strong><button type="button" class="mini-btn" data-stats-month="1" aria-label="Επόμενος μήνας">›</button></div>';
- html+='<p class="meta">Ημερολόγιο · Κάθε καταγραφή και διαφορά από προσωπικό ρεκόρ</p>';
+ html+='<p class="meta">Ημερολόγιο · Διαφορά από καλύτερο χρόνο δρομολογίου</p>';
  if(!statsHistoryReady)html+='<div class="empty">'+(statsHistoryLoading?'Φόρτωση στατιστικών…':'Δεν υπάρχουν διαθέσιμα στοιχεία.')+'</div>';
  if(statsHistoryReady){
   html+='<div class="stats-overview"><span><b>'+all.length+'</b><small>Διαδρομές</small></span><span><b>'+duration(statMean(all))+'</b><small>Μ.Ο. όλων</small></span><span><b>'+new Set(all.map(r=>r.driver_id)).size+'</b><small>Οδηγοί</small></span></div>';
@@ -393,14 +393,14 @@ function renderStats(){
    for(const run of runs){if(!daily.has(run.service_date))daily.set(run.service_date,[]);daily.get(run.service_date).push(run);}
    for(const [date,dayRuns] of daily){
      for(const run of dayRuns){
-       const personalBest=statsPersonalBests[driver.id+"|"+run.route_code];
-       const best=personalBest?.best_seconds??null;
-       const count=personalBest?.completed_count??0;
+       const routeBest=statsRouteBests[run.route_code];
+       const best=routeBest?.best_seconds??null;
+       const count=routeBest?.completed_count??0;
        const actual=lengthSecs(run),diff=best===null?null:actual-best;
-       const firstOnly=count===1;
-       const label=best===null?"—":firstOnly?"Πρώτη φορά":Math.abs(diff)<30?"Ρεκόρ":"+"+Math.round(diff/60)+"λ";
+       const onlyOne=count===1;
+       const label=best===null?"—":onlyOne?"Πρώτη φορά":diff<30?"Ρεκόρ διαδρομής":"+"+Math.round(diff/60)+"λ";
        const labelClass=best!==null&&diff>=600?"late":diff<30?"good":"muted";
-       const hint=firstOnly?"Χωρίς προηγούμενη σύγκριση":"από προσωπικό ρεκόρ";
+       const hint=onlyOne?"Μοναδική καταχώριση":"από καλύτερο χρόνο διαδρομής";
        html+='<div class="stats-record-line"><div class="stats-record-main"><strong>'+safe(statWeekday(run.service_date))+' '+dayLabel(run.service_date)+'</strong><b>'+duration(actual)+'</b><small>'+safe(routeName(run.route_code))+'</small></div><div class="stats-record-diff '+labelClass+'"><strong>'+label+'</strong><small>'+hint+'</small></div></div>';
      }
    }
@@ -414,7 +414,7 @@ function renderStats(){
   }
   html+='</div></details></section>';
  }
- html+='</div><p class="note stats-note">Οι προσωπικοί χρόνοι συγκρίνονται με τον ταχύτερο χρόνο του ίδιου οδηγού στο ίδιο δρομολόγιο, από όλο το ιστορικό. Οι συνολικές συγκρίσεις με άλλους οδηγούς γίνονται στο ίδιο δρομολόγιο. Η διαφορά δείχνει χρόνο και όχι ευθύνη του οδηγού. Κίνηση, φόρτος, στάσεις και συνθήκες μπορούν να επηρεάσουν τον χρόνο.</p>';
+ html+='</div><p class="note stats-note">Κάθε καταχώριση συγκρίνεται με τον καλύτερο χρόνο του ίδιου δρομολογίου από όλους τους οδηγούς, σε όλο το ιστορικό. Οι συνολικές συγκρίσεις με άλλους οδηγούς γίνονται στο ίδιο δρομολόγιο. Η διαφορά δείχνει χρόνο και όχι ευθύνη του οδηγού. Κίνηση, φόρτος, στάσεις και συνθήκες μπορούν να επηρεάσουν τον χρόνο.</p>';
  $("main").innerHTML=html;
 }
 
