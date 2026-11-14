@@ -131,6 +131,9 @@ html,body{max-width:100%;overflow-x:hidden}
 .compact-driver-values strong{font-size:16px;font-variant-numeric:tabular-nums}
 .compact-driver-values small.good{color:#93ebcf}
 .compact-driver-values small.late{color:#ffdbaf}
+.compact-driver-samples{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:5px;margin:0 0 5px}
+.compact-driver-samples span{font-size:11px;line-height:1.3;border:1px solid #4775a6;border-radius:7px;background:#204675;padding:4px 6px;color:#eaf4ff;font-variant-numeric:tabular-nums}
+.compact-driver-samples .sample-note{border:0;background:none;color:var(--sub);padding-left:0}
 .compact-stat-empty{font-size:12px;color:var(--sub);padding:11px 0;margin:0!important}
 @media(max-width:699px){
  .compact-stats-list{gap:7px}
@@ -277,14 +280,26 @@ function renderStats(){
    html+='<p class="compact-stat-help">Μ.Ο. οδηγού · Σύγκριση με το δρομολόγιο</p>';
    for(const row of driverRows){
     const diff=row.avg_seconds-base.avg_seconds;
+    const samples=statsHistoryReady?statsHistory.filter(r=>r.route_code===route.code&&r.driver_id===row.driver_id&&r.arrival_at&&r.departure_at&&lengthSecs(r)!=null&&lengthSecs(r)>0)
+      .sort((a,b)=>Date.parse(b.departure_at)-Date.parse(a.departure_at)).slice(0,5):[];
     html+='<div class="compact-driver-row"><span class="compact-driver-name"><strong>'+safe(driverName(row.driver_id))+'</strong><small>Τελευταία '+duration(row.last_seconds)+' · '+row.trips+' φορ'+(row.trips===1?'ά':'ές')+'</small></span>';
-    html+='<span class="compact-driver-values"><strong>'+duration(row.avg_seconds)+'</strong><small class="'+(diff<=0?'good':'late')+'">'+delta(diff)+' από Μ.Ο.</small></span></div>';
+    html+='<span class="compact-driver-values"><strong>'+duration(row.avg_seconds)+'</strong><small class="'+(diff<=0?'good':'late')+'">'+delta(diff)+' από Μ.Ο.</small></span>';
+    if(samples.length){
+      html+='<div class="compact-driver-samples" aria-label="Πέντε τελευταίες καταγραφές">'+samples.map(r=>'<span>'+dayLabel(r.service_date)+' · '+duration(lengthSecs(r))+'</span>').join("")+'</div>';
+    }else if(!statsHistoryReady){
+      html+='<div class="compact-driver-samples"><span class="sample-note">Φόρτωση πρόσφατων χρόνων…</span></div>';
+    }else{
+      html+='<div class="compact-driver-samples"><span class="sample-note">Δεν υπάρχουν πρόσφατες καταγραφές στο τελευταίο εξάμηνο.</span></div>';
+    }
+    html+='</div>';
    }
   }
   html+='</div></details></section>';
  }
  if(!state.routes.length)html+='<div class="empty">Δεν υπάρχουν δρομολόγια.</div>';
+ const openRoute=[...document.querySelectorAll(".compact-stat-details")].findIndex(el=>el.open);
  $("main").innerHTML=html+'</div>';
+ if(openRoute>=0){const details=$("main").querySelectorAll(".compact-stat-details");if(details[openRoute])details[openRoute].open=true;}
 }
 function renderHistory(){
  let s='<h2>Ιστορικό</h2><p class="meta">'+dayLabel(histFrom)+' – '+dayLabel(histTo)+'</p>';
