@@ -227,7 +227,7 @@ let tab="today",busy=false,editing=null,historyRows=[],historyLoaded=false;
 let histFrom="",histTo="",routeFilter="",driverFilter="",statRoute="A",historyFiltersOpen=false;
 
 
-let statsHistory=[],priorStatsHistory=[],statsHistoryReady=false,statsHistoryLoading=false,statsHistoryAt=0,statsOpenDriver="";
+let statsHistory=[],priorStatsHistory=[],statsBaselines={},statsHistoryReady=false,statsHistoryLoading=false,statsHistoryAt=0,statsOpenDriver="";
 let statsMonth=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Athens",year:"numeric",month:"2-digit"}).format(new Date()).slice(0,7);
 const statsMonthLabel=ym=>new Intl.DateTimeFormat("el-GR",{month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(ym+"-15T12:00:00Z"));
 const monthAdjacent=(month,delta)=>{const d=new Date(month+"-15T12:00:00Z");d.setUTCMonth(d.getUTCMonth()+delta);return d.toISOString().slice(0,7);};
@@ -249,9 +249,9 @@ async function loadStatsHistory(force=false){
  statsHistoryLoading=true;
  const month=statsMonth;
  try{
-  const [current,previous]=await Promise.all([fetchStatsMonth(month),fetchStatsMonth(monthAdjacent(month,-1))]);
+  const [current,previous,baselineData]=await Promise.all([fetchStatsMonth(month),fetchStatsMonth(monthAdjacent(month,-1)),fetch("https://oikcdjnxkmgrpyedxera.supabase.co/functions/v1/douleia-route-baselines",{cache:"no-store"}).then(async r=>{if(!r.ok)throw Error("Δεν φορτώθηκε ο αρχικός χρόνος.");return r.json();})]);
   if(statsMonth!==month)return;
-  statsHistory=current;priorStatsHistory=previous;statsHistoryReady=true;statsHistoryAt=Date.now();
+  statsHistory=current;priorStatsHistory=previous;statsBaselines=Object.fromEntries((baselineData.baselines||[]).map(b=>[b.route_code,b]));statsHistoryReady=true;statsHistoryAt=Date.now();
  }catch(e){statsHistoryReady=false;console.warn("Στατιστικά μήνα:",e);if(tab==="stats")toast("Δεν φορτώθηκαν τα μηνιαία στατιστικά.",true);}
  finally{statsHistoryLoading=false;if(tab==="stats")renderStats();}
 }
@@ -333,7 +333,7 @@ function renderStats(){
  const drivers=state.drivers.filter(d=>d.is_active||all.some(r=>r.driver_id===d.id));
  drivers.sort((a,b)=>a.name.localeCompare(b.name,"el"));
  let html='<h2>Μηνιαία στατιστικά</h2><div class="stats-month-nav"><button type="button" class="mini-btn" data-stats-month="-1" aria-label="Προηγούμενος μήνας">‹</button><strong>'+safe(statsMonthLabel(statsMonth))+'</strong><button type="button" class="mini-btn" data-stats-month="1" aria-label="Επόμενος μήνας">›</button></div>';
- html+='<p class="meta">Ημερολόγιο οδηγών · Κάθε διαδρομή · Μ.Ο. μήνα</p>';
+ html+='<p class="meta">Ημερολόγιο οδηγών · Διάρκεια και ± από την πρώτη καταχώριση</p>';
  if(!statsHistoryReady)html+='<div class="empty">'+(statsHistoryLoading?'Φόρτωση στατιστικών…':'Δεν υπάρχουν διαθέσιμα στοιχεία.')+'</div>';
  if(statsHistoryReady){
   html+='<div class="stats-overview"><span><b>'+all.length+'</b><small>Διαδρομές</small></span><span><b>'+duration(statMean(all))+'</b><small>Μ.Ο. όλων</small></span><span><b>'+new Set(all.map(r=>r.driver_id)).size+'</b><small>Οδηγοί</small></span></div>';
@@ -381,8 +381,10 @@ function renderStats(){
     html+='<div class="stats-day"><div class="stats-day-head"><strong>'+safe(statWeekday(date))+' '+dayLabel(date)+'</strong><span>'+dayRuns.length+' '+(dayRuns.length===1?'δρομολόγιο':'δρομολόγια')+' · <b>Σύνολο '+duration(total)+'</b></span></div>';
     for(const run of dayRuns){
       const code=run.route_code,own=runs.filter(r=>r.route_code===code),ownAvg=statMean(own);
-      const deviation=lengthSecs(run)-ownAvg,slower=deviation>=600,deltaText=statGap(lengthSecs(run),ownAvg);
-      html+='<div class="stats-day-trip"><span>'+safe(routeName(code))+'</span><strong>'+duration(lengthSecs(run))+'</strong><small class="'+(slower?'late':'muted')+'">'+deltaText+(slower?' · πιο αργά':'')+'</small></div>';
+      const baseline=statsBaselines[code]?.baseline_seconds??null;
+      const deviation=baseline===null?null:lengthSecs(run)-baseline;
+      const slower=deviation!==null&&deviation>=600,deltaText=statGap(lengthSecs(run),baseline);
+      html+='<div class="stats-day-trip"><span>'+safe(routeName(code))+'</span><strong>'+duration(lengthSecs(run))+'</strong><small class="'+(slower?'late':'muted')+'">'+(baseline===null?'Χωρίς βάση':(statsBaselines[code]?.run_id===run.id?'Αρχική εγγραφή':deltaText+' από 1η'))+(slower?' · πιο αργά':'')+'</small></div>';
     }
     html+='</div>';
    }
@@ -390,12 +392,13 @@ function renderStats(){
    html+='<div class="stats-diary-title">Σύγκριση ίδιων δρομολογίων</div>';
    for(const code of [...new Set(runs.map(r=>r.route_code))]){
     const own=runs.filter(r=>r.route_code===code),ownAvg=statMean(own),others=countByRoute(code).filter(r=>r.driver_id!==driver.id),othersAvg=statMean(others);
-    html+='<div class="stats-route-compare"><span>'+safe(routeName(code))+' <small>'+own.length+' φορές</small></span><strong>'+duration(ownAvg)+'</strong><small>'+(others.length?statGap(ownAvg,othersAvg)+' από άλλους ('+others.length+')':'Δεν υπάρχουν άλλοι οδηγοί')+'</small></div>';
+    const baseline=statsBaselines[code]?.baseline_seconds??null;
+    html+='<div class="stats-route-compare"><span>'+safe(routeName(code))+' <small>'+own.length+' φορές · Αρχικός '+duration(baseline)+'</small></span><strong>'+duration(ownAvg)+'</strong><small>'+(baseline==null?'Χωρίς αρχική καταχώριση':statGap(ownAvg,baseline)+' από αρχική')+' · '+(others.length?statGap(ownAvg,othersAvg)+' από άλλους ('+others.length+')':'Δεν υπάρχουν άλλοι οδηγοί')+'</small></div>';
    }
   }
   html+='</div></details></section>';
  }
- html+='</div><p class="note stats-note">Οι συγκρίσεις γίνονται ανά ίδιο δρομολόγιο. Η ένδειξη «πιο αργή» σημαίνει τουλάχιστον 10 λεπτά πάνω από τον προσωπικό μέσο όρο της συγκεκριμένης διαδρομής, όχι ευθύνη του οδηγού. Κίνηση, φόρτος, στάσεις και συνθήκες μπορούν να επηρεάσουν τον χρόνο.</p>';
+ html+='</div><p class="note stats-note">Οι συγκρίσεις γίνονται ανά ίδιο δρομολόγιο. Ο αρχικός χρόνος κάθε δρομολογίου είναι η πρώτη ολοκληρωμένη καταχώρισή του. Η ένδειξη «πιο αργά» σημαίνει τουλάχιστον 10 λεπτά πάνω από αυτόν τον αρχικό χρόνο, όχι ευθύνη του οδηγού. Κίνηση, φόρτος, στάσεις και συνθήκες μπορούν να επηρεάσουν τον χρόνο.</p>';
  $("main").innerHTML=html;
 }
 
