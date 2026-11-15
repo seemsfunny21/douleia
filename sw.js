@@ -1,4 +1,4 @@
-const CACHE="dromologia-github-v1";
+const CACHE="dromologia-github-neon-v2";
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(["./","./index.html","./manifest.webmanifest","./icon.svg"])).then(()=>self.skipWaiting()));
 });
