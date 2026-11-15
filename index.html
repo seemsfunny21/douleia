@@ -240,6 +240,200 @@ html,body{max-width:100%;overflow-x:hidden}
 .stats-driver-entry .stats-month-end{margin-top:9px}
 @media(max-width:390px){.stats-route-head{padding:11px;gap:6px}.stats-route-best b{font-size:17px}.stats-driver-entry .stats-driver-head{gap:5px}.stats-driver-entry .stats-driver-average b{font-size:17px}}
 
+
+/* NEON MIDDLE CONCEPT - CSS ONLY. Preserve all original app logic and structure. */
+:root{
+  --bg:#061428;
+  --panel:#102b4b;
+  --edge:#427db3;
+  --fg:#fff;
+  --sub:#c9dff5;
+  --accent:#1178eb;
+  --accent-edge:#6fd0ff;
+  --nav:#0b223e;
+  --active:#1168c3;
+  --field:#0b213b;
+  --secondary:#194f83;
+}
+html,body{
+  background:
+    radial-gradient(ellipse at 50% -15%,rgba(1,120,255,.25),transparent 43%),
+    linear-gradient(180deg,#040e1b 0%,#08182d 42%,#061327 100%);
+}
+#scroll{background:transparent}
+.wrap{position:relative}
+header{position:relative;padding-bottom:17px}
+header::after{
+  content:"";display:block;width:min(78%,360px);height:2px;
+  margin:11px auto 0;
+  border-radius:100%;
+  background:linear-gradient(90deg,transparent,#20aaff,#8deaff,#20aaff,transparent);
+  box-shadow:0 0 12px #149bffb8,0 0 23px #028dff75;
+}
+header .logo{
+  background:linear-gradient(145deg,#145d9a,#0b2c51);
+  border:1px solid #6bbcff;
+  box-shadow:inset 0 1px 0 #ffffff36,0 0 13px #139fff80,0 8px 24px #010b21c7;
+}
+header h1{letter-spacing:.15px;text-shadow:0 0 15px #65a9ff38}
+#main>h2{
+  position:relative;
+  width:max-content;
+  max-width:100%;
+  min-width:min(190px,85%);
+  margin:13px auto 12px;
+  padding:9px 26px;
+  border:1px solid #55bbfc;
+  border-radius:999px;
+  background:linear-gradient(180deg,#103d6c 0%,#0b2340 100%);
+  box-shadow:inset 0 1px 0 #ffffff29,0 0 0 3px #08396470,0 0 17px #058bff65;
+  color:#f9fcff;
+  line-height:1.25;
+}
+.meta{color:#c2def9}
+.card,.metric,.compact-stat-card,.stats-route-card,.stats-driver-card{
+  background:
+    radial-gradient(ellipse at 100% 0%,#267cb830,transparent 66%),
+    linear-gradient(145deg,#123a64 0%,#0b2544 100%);
+  border:1px solid #5796d4;
+  border-radius:19px;
+  box-shadow:inset 0 1px 0 #ffffff16,0 7px 23px #010a1c80,0 0 0 1px #0a6ec627;
+}
+.route-card{
+  border-color:#63b6ef;
+  background:
+    radial-gradient(ellipse at 100% 0%,#2279ad4b,transparent 64%),
+    linear-gradient(145deg,#133c66 0%,#0b2443 100%);
+  box-shadow:inset 0 1px 0 #ffffff21,0 10px 30px #000a1ba3,0 0 13px #168be74a;
+}
+.route-card.is-active{
+  border-color:#54dcff;
+  box-shadow:inset 0 1px 0 #a9efff39,0 10px 30px #000a1bb8,0 0 0 1px #0d96df54,0 0 20px #0399ff86;
+}
+.route-card.is-done{
+  border-color:#6db5dc;
+  box-shadow:inset 0 1px 0 #ffffff1c,0 8px 24px #000a1b87,0 0 13px #3a90d74b;
+}
+.route-top h3{font-weight:800;letter-spacing:.08px}
+.tag{
+  background:linear-gradient(180deg,#1c5287,#163d69);
+  color:#f6fcff;
+  border:1px solid #83b6e5;
+  box-shadow:inset 0 1px 0 #ffffff19,0 2px 8px #00102085;
+}
+.tag.active{
+  background:linear-gradient(180deg,#075b80,#063954);
+  border-color:#38dfff;
+  color:#cffbff;
+  box-shadow:0 0 12px #07c3e477,inset 0 1px 0 #affaff1e;
+}
+.tag.wait{background:linear-gradient(180deg,#264564,#1a314b);border-color:#6689ac}
+.tag.done{
+  background:linear-gradient(180deg,#145d73,#123c59);
+  border-color:#5ac5e4;
+  color:#dcfaff;
+}
+.btn{
+  background:linear-gradient(180deg,#159bff 0%,#0877ea 48%,#075bc9 100%);
+  border-color:#82dbff;
+  border-radius:13px;
+  box-shadow:inset 0 1px 0 #ffffff66,0 0 0 1px #0071d95c,0 3px 12px #087bff69;
+  text-shadow:0 1px 1px #052144a3;
+}
+.btn.secondary{
+  background:linear-gradient(180deg,#275b8e,#17416d);
+  border-color:#71a6d1;
+  box-shadow:inset 0 1px 0 #ffffff1e,0 3px 10px #000e2699;
+}
+.btn.ghost{background:#11335380;border-color:#75a8d0;box-shadow:none}
+.btn.warn{background:linear-gradient(180deg,#a7435e,#79304a);border-color:#e29ab2;box-shadow:0 3px 10px #3d06167a}
+.btn:disabled,.mini-btn:disabled,.driver-choice:disabled{box-shadow:none;filter:none}
+.mini-btn{
+  background:linear-gradient(180deg,#275b96,#164470);
+  border:1px solid #7cbeed;
+  box-shadow:inset 0 1px 0 #ffffff20,0 2px 8px #000e2677;
+}
+.driver-choice{
+  background:linear-gradient(180deg,#1d5188 0%,#123b69 100%);
+  border:1px solid #70b2e6;
+  box-shadow:inset 0 1px 0 #ffffff27,0 3px 12px #030e23a3;
+}
+.driver-choice:not(:disabled):active{background:#177bce}
+@media(hover:hover){
+  .driver-choice:not(:disabled):hover,.btn:not(:disabled):hover{filter:brightness(1.1)}
+}
+.trip-line,.time-cell,.prediction{
+  background:linear-gradient(155deg,#1b4776,#102e51);
+  border:1px solid #558ac2;
+  box-shadow:inset 0 1px 0 #ffffff16,0 2px 9px #00132856;
+}
+.trip-line b,.trip-line strong,.time-cell .time{color:#fff;text-shadow:0 0 8px #60beff45}
+.metric,.stats-overview>span{
+  background:linear-gradient(155deg,#143e6b,#0c2a4c);
+  border-color:#5a9fd4;
+  box-shadow:inset 0 1px 0 #ffffff1c,0 3px 12px #0013289c;
+}
+.stats-overview b,.metric strong{color:#f6fbff;text-shadow:0 0 13px #59b2ff65}
+.compact-stat-content,.stats-route-body,.stats-driver-body{
+  background:#0d2949;
+  border-top-color:#5b97cc;
+}
+.stats-driver-entry,.stats-metrics span,.stats-route-mini span,
+.stats-day-trip,.stats-record-main,.stats-record-diff,
+.stats-month-end,.stats-route-title{
+  background:linear-gradient(150deg,#1c4b79,#123254);
+  border-color:#528bbf;
+}
+.stats-record-diff.good{background:#154a4f;border-color:#48b8ab}
+.stats-record-diff.late{background:#53412e;border-color:#bd9563}
+.compact-stat-head:hover,.stats-route-head:hover,.stats-driver-head:hover{background:#1c56833b}
+.field input,.field select,textarea,.controls select,.route-controls select{
+  background:linear-gradient(180deg,#0b2442,#0d3053);
+  border-color:#6196c4;
+  box-shadow:inset 0 1px 6px #00081d6e;
+}
+.field input:focus,.field select:focus,textarea:focus,.route-controls select:focus{
+  border-color:#8be1ff;
+  box-shadow:0 0 0 2px #0987ff50;
+}
+.bottom-nav{
+  background:linear-gradient(180deg,#102c4ff5,#061b34fc);
+  border-top:1px solid #5cb6f9;
+  box-shadow:0 -3px 16px #088dfd3c,0 -8px 27px #0009;
+  backdrop-filter:blur(12px);
+}
+.bottom-nav button{color:#d4e7ff;transition:background .15s ease,box-shadow .15s ease}
+.bottom-nav button.active{
+  background:linear-gradient(155deg,#128fe7,#0b52a7);
+  color:#fff;
+  box-shadow:inset 0 1px 0 #b9f7ff7c,0 0 0 1px #51bbff,0 0 17px #058fff87;
+}
+dialog{
+  background:linear-gradient(155deg,#143963,#0a2544);
+  border:1px solid #74bcec;
+  box-shadow:0 0 0 1px #1289e83d,0 22px 75px #000d;
+}
+dialog::backdrop{background:#010817c9;backdrop-filter:blur(3px)}
+.status:not(.error){background:#103d68;border-color:#55baff;box-shadow:0 0 18px #047cda75}
+.leave-selected{
+  background:linear-gradient(180deg,#278de0,#15588f)!important;
+  border:3px solid #a6eaff!important;
+  box-shadow:0 0 12px #299aff7e,0 0 0 2px #123c6c inset!important;
+}
+@media(max-width:699px){
+  .wrap{padding:12px 12px 22px}
+  header{padding-bottom:8px}
+  header::after{margin:9px auto 0;width:74%}
+  #main>h2{margin:10px auto 12px;padding:9px 22px;font-size:18px}
+  .route-card{border-radius:19px;padding:16px}
+  .route-grid{gap:13px}
+  .route-buttons .btn{min-height:55px}
+  .bottom-nav{padding-top:7px}
+}
+@media(prefers-reduced-motion:reduce){
+  .bottom-nav button{transition:none}
+}
+
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 4v2h-7z"/><circle cx="7.5" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></div><h1>Δρομολόγια</h1></header>
