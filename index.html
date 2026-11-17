@@ -445,6 +445,31 @@ dialog::backdrop{background:#010817c9;backdrop-filter:blur(3px)}
 }
 
 
+/* Compact two-column personnel cards, matching the New Leave selection grid. */
+.staff-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.staff-grid:empty{display:none}
+.staff-item{
+ min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:9px;
+ border:1px solid #70b2e6;border-radius:13px;
+ background:linear-gradient(180deg,#1d5188,#123b69);
+ box-shadow:inset 0 1px 0 #ffffff27,0 3px 12px #030e23a3;
+ padding:11px 8px;text-align:center;
+}
+.staff-item .identity{min-width:0;overflow-wrap:anywhere}
+.staff-item .identity strong{display:block;font-size:clamp(13px,3.4vw,16px);line-height:1.35}
+.staff-item .identity .sub{margin-top:5px;font-size:12px}
+.staff-item .actions{margin-top:auto;width:100%;display:block}
+.staff-item .actions .mini-btn{
+ display:block;width:100%;min-width:0;min-height:42px;
+ padding:8px 4px;white-space:normal;overflow-wrap:anywhere;
+ font-size:clamp(11px,2.8vw,13px);line-height:1.25;
+}
+@media(max-width:350px){
+ .staff-grid{gap:7px}
+ .staff-item{padding:9px 6px}
+ .staff-item .actions .mini-btn{font-size:11px}
+}
+
 /* Premium consistency: subtle card depth and accessible touch targets. */
 .route-card,.history-card{
  box-shadow:0 13px 32px rgba(0,7,20,.23),inset 0 1px rgba(255,255,255,.055);
@@ -755,9 +780,9 @@ function renderLeaves(){
   const label=item.kind==="week"?"5 ημέρες":"1 ημέρα";
   html+='<section class="card history-card"><div class="row"><strong>'+safe(staffName(item.staff_id))+'</strong><span class="tag '+(item.start_date<=date&&item.end_date>=date?'done':'wait')+'">'+label+'</span></div><div class="sub">'+dayLabel(item.start_date)+(item.start_date!==item.end_date?' – '+dayLabel(item.end_date):'')+'</div><div class="action-row"><button class="mini-btn" data-leave="delete" data-id="'+safe(item.id)+'">Διαγραφή</button></div></section>';
  }
- html+='</div><h2>Προσωπικό</h2><section class="card"><button class="btn full" data-leave="add-staff">+ Νέος εργαζόμενος</button>';
- for(const p of staffRecords){html+='<div class="settings-person"><div class="identity"><strong>'+safe(p.name)+'</strong><div class="sub">'+(p.active?'Ενεργός':'Ανενεργός')+'</div></div><div class="actions"><button class="mini-btn" data-leave="toggle-staff" data-id="'+safe(p.id)+'" data-active="'+(!p.active)+'">'+(p.active?'Απενεργοποίηση':'Ενεργοποίηση')+'</button></div></div>';}
- html+='</section>';
+ html+='</div><h2>Προσωπικό</h2><section class="card"><button class="btn full" data-leave="add-staff">+ Νέος εργαζόμενος</button><div class="staff-grid">';
+ for(const p of staffRecords){html+='<div class="staff-item"><div class="identity"><strong>'+safe(p.name)+'</strong><div class="sub">'+(p.active?'Ενεργός':'Ανενεργός')+'</div></div><div class="actions"><button class="mini-btn" data-leave="toggle-staff" data-id="'+safe(p.id)+'" data-active="'+(!p.active)+'">'+(p.active?'Απενεργοποίηση':'Ενεργοποίηση')+'</button></div></div>';}
+ html+='</div></section>';
  $("main").innerHTML=html;
 }
 document.addEventListener("click",async event=>{
