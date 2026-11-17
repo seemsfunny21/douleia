@@ -1067,27 +1067,46 @@ document.addEventListener("toggle",event=>{
  const surface=$("scroll");
  if(!surface)return;
  const tabs=["today","history","stats","drivers","leaves"];
- let start=null;
- const blocked=target=>target instanceof Element && !!target.closest('button,a,input,select,textarea,label,form,dialog,summary,details,iframe,[contenteditable],[data-no-swipe],[role="slider"],.toolbar');
+ let start=null,swiped=false;
+ // Cards and their buttons may start a swipe. Only editable controls
+ // and native embedded widgets should retain exclusive touch gestures.
+ const blocked=target=>target instanceof Element && !!target.closest(
+  'input,select,textarea,iframe,video,audio,[contenteditable],[data-no-swipe],[role="slider"],[role="textbox"]'
+ );
  surface.addEventListener("touchstart",event=>{
-  start=null;
+  start=null;swiped=false;
   if(event.touches.length!==1||busy||blocked(event.target)||$("editDialog").open)return;
   const touch=event.touches[0];
   if(touch.clientX<24||touch.clientX>window.innerWidth-24)return;
   start={x:touch.clientX,y:touch.clientY,at:Date.now()};
  },{passive:true});
+ surface.addEventListener("touchmove",event=>{
+  if(!start||event.touches.length!==1)return;
+  const touch=event.touches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y;
+  if(Math.abs(dx)>22&&Math.abs(dx)>Math.abs(dy)*1.5&&event.cancelable){
+   event.preventDefault(); // Prevent a swipe across a button from becoming a click.
+  }
+ },{passive:false});
  surface.addEventListener("touchend",event=>{
   if(!start)return;
   const initial=start;start=null;
-  if(event.changedTouches.length!==1||busy||blocked(event.target)||$("editDialog").open)return;
+  if(event.changedTouches.length!==1||busy||$("editDialog").open)return;
   const touch=event.changedTouches[0];
   const dx=touch.clientX-initial.x,dy=touch.clientY-initial.y;
   if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.6||Date.now()-initial.at>1000)return;
   const pos=tabs.indexOf(tab),next=pos+(dx<0?1:-1);
   if(next<0||next>=tabs.length)return;
+  swiped=true;
   document.querySelector('.bottom-nav button[data-tab="'+tabs[next]+'"]')?.click();
  },{passive:true});
- surface.addEventListener("touchcancel",()=>{start=null},{passive:true});
+ // A fast horizontal flick can finish without an intermediate touchmove.
+ // Suppress only its subsequent native click, never the programmatic tab click.
+ surface.addEventListener("click",event=>{
+  if(swiped&&event.isTrusted){
+   swiped=false;event.preventDefault();event.stopImmediatePropagation();
+  }
+ },true);
+ surface.addEventListener("touchcancel",()=>{start=null;swiped=false},{passive:true});
 })();
 
 (function init(){const now=localDay();histTo=now;const t=new Date(now+"T12:00:00Z");t.setUTCDate(1);histFrom=t.toISOString().slice(0,10);refresh(false);setInterval(()=>{if(document.visibilityState==="visible"&&!$("editDialog").open&&tab==="today")refresh(false)},30000);if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});})();
