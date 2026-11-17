@@ -444,6 +444,26 @@ dialog::backdrop{background:#010817c9;backdrop-filter:blur(3px)}
   .bottom-nav button{transition:none}
 }
 
+
+/* Premium consistency: subtle card depth and accessible touch targets. */
+.route-card,.history-card{
+ box-shadow:0 13px 32px rgba(0,7,20,.23),inset 0 1px rgba(255,255,255,.055);
+}
+.route-card:focus-within,.history-card:focus-within{
+ border-color:#83c8ff;
+ box-shadow:0 11px 30px rgba(0,7,20,.26),0 0 0 1px rgba(102,184,255,.3);
+}
+:where(.btn,.mini-btn,.driver-choice,.bottom-nav button){
+ -webkit-tap-highlight-color:transparent;
+ touch-action:manipulation;
+}
+@media(hover:hover){
+ :where(.btn,.mini-btn):not(:disabled):hover{filter:brightness(1.10)}
+}
+@media(prefers-reduced-motion:reduce){
+ :where(.btn,.mini-btn,.driver-choice,.bottom-nav button){transition:none!important}
+}
+
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 4v2h-7z"/><circle cx="7.5" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></div><h1>Δρομολόγια</h1></header>
