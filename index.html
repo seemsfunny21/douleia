@@ -598,9 +598,20 @@ dialog::backdrop{background:#010817c9;backdrop-filter:blur(3px)}
  .history-day-heading>span{font-size:10px}
 }
 
+
+/* Compact illustrated hero — no duplicate logo or heading. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.routes-hero-head{display:block!important;position:relative;padding:0!important;margin:0 auto 10px!important;max-width:720px;border:0;background:transparent}
+.routes-hero-art{display:block;width:100%;height:auto;max-height:200px;object-fit:contain;border-radius:14px;box-shadow:0 12px 32px rgba(0,6,20,.27);border:1px solid rgba(87,159,255,.28)}
+@media(max-width:699px){
+ .routes-hero-head{margin:0 auto 6px!important}
+ .routes-hero-art{max-height:145px;border-radius:11px}
+}
+@media(max-height:620px) and (max-width:699px){.routes-hero-art{max-height:102px;object-fit:fill}}
+
 </style></head>
 <body><div id="scroll"><div class="wrap">
-<header><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h11v10H3zM14 10h4l3 4v2h-7z"/><circle cx="7.5" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></div><h1>Δρομολόγια</h1></header>
+<header class="routes-hero-head"><img src="./hero-banner.svg" class="routes-hero-art" alt="Δρομολόγια — οδηγοί, χρόνοι και ιστορικό" width="1200" height="400" decoding="async"><h1 class="sr-only">Δρομολόγια</h1></header>
 <main id="main" aria-live="polite"><div class="empty">Σύνδεση με τη βάση δεδομένων…</div></main>
 
 </div></div>
