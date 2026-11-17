@@ -631,6 +631,14 @@ dialog::backdrop{background:#010817c9;backdrop-filter:blur(3px)}
   object-position:center!important;
  }
 }
+
+/* Applications: match the five top banners without an extra decoration line. */
+@media(max-width:760px){
+ .routes-hero-head{margin:0 auto 10px!important;padding:0!important}
+ .routes-hero-head::after{display:none!important}
+ .routes-hero-art{border-radius:12px!important}
+}
+
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header class="routes-hero-head"><img src="./hero-banner.webp" class="routes-hero-art" alt="Δρομολόγια — οδηγοί, χρόνοι και ιστορικό" width="900" height="300" decoding="async"><h1 class="sr-only">Δρομολόγια</h1></header>
