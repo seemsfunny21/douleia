@@ -639,6 +639,32 @@ dialog::backdrop{background:#010817c9;backdrop-filter:blur(3px)}
  .routes-hero-art{border-radius:12px!important}
 }
 
+
+/* PC/TV dashboard: more routes per row, readable timing, no change under 1200px. */
+@media(min-width:1200px){
+ .wrap{max-width:1560px;padding:22px clamp(28px,3vw,56px) 34px}
+ .route-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+ .route-grid>.card{min-width:0;min-height:225px;padding:21px}
+ .history-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
+ .route-top h3{font-size:clamp(19px,1.3vw,23px)}
+ .driver-name{font-size:clamp(18px,1.12vw,21px)}
+ .time-cell .time{font-size:clamp(23px,1.7vw,30px)}
+ .bottom-nav{
+  max-width:960px;
+  padding:9px 15px 12px;
+  border-radius:18px 18px 0 0;
+ }
+ .bottom-nav button{font-size:14px;min-height:60px}
+ .bottom-nav button span{font-size:23px}
+ .route-grid .btn,.route-grid select{min-height:49px}
+ .metric-bar{gap:15px}
+ .metric{padding:16px 12px}
+}
+@media(min-width:1850px){
+ .wrap{max-width:1720px}
+ .route-grid{gap:23px}
+ .history-list{gap:21px}
+}
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header class="routes-hero-head"><img src="./hero-banner.webp" class="routes-hero-art" alt="Δρομολόγια — οδηγοί, χρόνοι και ιστορικό" width="900" height="300" decoding="async"><h1 class="sr-only">Δρομολόγια</h1></header>
