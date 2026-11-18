@@ -2,7 +2,7 @@
    caches from voltes, reminder, Pegasus or the applications launcher:
    GitHub Pages apps share the same origin and Cache Storage. */
 const PREFIX = "dromologia-github-neon-";
-const CACHE = PREFIX + "v13";
+const CACHE = PREFIX + "v14-wide-desktop";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg","./hero-banner.webp"];
 
 self.addEventListener("install", event => {
