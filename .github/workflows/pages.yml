@@ -29,7 +29,9 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p _site
-          cp index.html manifest.webmanifest icon.svg sw.js .nojekyll _site/
+          cp index.html manifest.webmanifest icon.svg sw.js .nojekyll hero-banner.webp hero-banner.svg _site/
+          test -s _site/hero-banner.webp
+          test -s _site/hero-banner.svg
       - name: Upload site
         uses: actions/upload-pages-artifact@v4
         with:
