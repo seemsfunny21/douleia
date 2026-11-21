@@ -2,8 +2,8 @@
    caches from voltes, reminder, Pegasus or the applications launcher:
    GitHub Pages apps share the same origin and Cache Storage. */
 const PREFIX = "dromologia-github-neon-";
-const CACHE = PREFIX + "v15-classic-layout";
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg","./hero-banner.webp"];
+const CACHE = PREFIX + "v16-route-push";
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./push.js", "./icon.svg","./hero-banner.webp"];
 
 self.addEventListener("install", event => {
   event.waitUntil(
@@ -54,4 +54,34 @@ self.addEventListener("fetch", event => {
     try { return await update; }
     catch { return Response.error(); }
   })());
+});
+
+/* Cache the optional push client for offline launches without changing API caching. */
+self.addEventListener("fetch", event => {
+ const req=event.request, url=new URL(req.url);
+ if(req.method!=="GET" || url.origin!==self.location.origin ||
+    url.pathname!==new URL("./push.js",self.registration.scope).pathname)return;
+ event.respondWith(caches.match(req).then(hit=>hit||fetch(req)));
+});
+
+self.addEventListener("push",event=>{
+ let data={};
+ try{data=event.data?.json()||{};}catch{data={body:event.data?.text()||""};}
+ event.waitUntil(self.registration.showNotification(
+  typeof data.title==="string"?data.title:"Δρομολόγια",
+  {body:typeof data.body==="string"?data.body:"Υπάρχει καθυστέρηση δρομολογίου.",
+   icon:new URL("./icon.svg",self.registration.scope).href,
+   badge:new URL("./icon.svg",self.registration.scope).href,
+   tag:typeof data.tag==="string"?data.tag:"douleia-alert",
+   data:{url:new URL("./",self.registration.scope).href}}
+ ));
+});
+self.addEventListener("notificationclick",event=>{
+ event.notification.close();
+ event.waitUntil((async()=>{
+  const target=new URL("./",self.registration.scope).href;
+  const clients=await self.clients.matchAll({type:"window",includeUncontrolled:true});
+  for(const client of clients){if(client.url.startsWith(target)&&"focus" in client)return client.focus();}
+  if(self.clients.openWindow)return self.clients.openWindow(target);
+ })());
 });
