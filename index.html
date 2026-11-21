@@ -643,6 +643,19 @@ dialog::backdrop{background:#010817c9;backdrop-filter:blur(3px)}
 dialog .buttons>button:only-child{grid-column:1/-1;justify-self:center;width:min(100%,260px);text-align:center}
 dialog .buttons>button{text-align:center}
 
+/* Compact notification settings: closed by default so route cards stay foremost. */
+.route-settings{max-width:650px;margin:0 auto 10px;position:relative}
+.route-settings>summary{list-style:none;display:flex;align-items:center;justify-content:flex-end;width:max-content;max-width:100%;gap:7px;margin:0 0 0 auto;padding:7px 12px;border:1px solid #5083c4;border-radius:999px;background:linear-gradient(145deg,#1b416e,#193359);color:#e4f2ff;box-shadow:0 3px 15px #0006,0 0 13px #478af326;font-size:12px;font-weight:700;cursor:pointer;user-select:none;min-height:36px}
+.route-settings>summary::-webkit-details-marker{display:none}
+.route-settings>summary::marker{content:""}
+.route-settings>summary:hover{border-color:#8abaff;background:#24568a}
+.route-settings>summary:focus-visible{outline:3px solid #9dccff;outline-offset:3px}
+.route-settings>summary .settings-gear{display:inline-grid;place-items:center;font-size:18px;line-height:1}
+.route-settings[open]>summary{border-radius:12px 12px 0 0;background:#285a93}
+.route-settings>.push-panel{margin:0;border-radius:16px 0 16px 16px;border-color:#5083c4;animation:route-settings-open .16s ease-out}
+@keyframes route-settings-open{from{opacity:.6;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.route-settings>.push-panel{animation:none}}
+
 /* Work-route Web Push: compact always-visible opt-in, independently of tab re-renders. */
 .push-panel{max-width:650px;margin:0 auto 13px;padding:10px 12px;border:1px solid #38669d;border-radius:14px;background:linear-gradient(145deg,#152c4b,#173c65);box-shadow:0 7px 22px #0005;text-align:center}
 .push-panel .push-label{font-size:12px;font-weight:700;color:#c9dfff;letter-spacing:.2px}
@@ -656,6 +669,8 @@ dialog .buttons>button{text-align:center}
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header class="routes-hero-head"><img src="./hero-banner.webp" class="routes-hero-art" alt="Δρομολόγια — οδηγοί, χρόνοι και ιστορικό" width="900" height="300" decoding="async"><h1 class="sr-only">Δρομολόγια</h1></header>
+<details class="route-settings" id="routeSettings" data-no-swipe>
+<summary aria-label="Άνοιγμα ρυθμίσεων ειδοποιήσεων"><span class="settings-gear" aria-hidden="true">⚙</span> Ρυθμίσεις</summary>
 <section class="push-panel" id="douleiaPush" aria-label="Ειδοποιήσεις δρομολογίων">
 <div class="push-label">🔔 Ειδοποιήσεις δρομολογίων</div>
 <p class="push-status" id="pushStatus" aria-live="polite">Ειδοποιήσεις καθυστέρησης αναχώρησης και άφιξης.</p>
@@ -664,6 +679,7 @@ dialog .buttons>button{text-align:center}
 <button type="button" id="pushTest" hidden>Δοκιμή push</button>
 <button type="button" id="pushDisable" hidden>Απενεργοποίηση</button>
 </div><a id="pushStandalone" href="./" target="_blank" rel="noopener" hidden>Άνοιγμα Δρομολογίων για ενεργοποίηση push</a></section>
+</details>
 <main id="main" aria-live="polite"><div class="empty">Σύνδεση με τη βάση δεδομένων…</div></main>
 
 </div></div>
