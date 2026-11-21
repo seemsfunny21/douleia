@@ -2,7 +2,7 @@
    caches from voltes, reminder, Pegasus or the applications launcher:
    GitHub Pages apps share the same origin and Cache Storage. */
 const PREFIX = "dromologia-github-neon-";
-const CACHE = PREFIX + "v17-route-push-standalone";
+const CACHE = PREFIX + "v18-live-push-client";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./push.js", "./icon.svg","./hero-banner.webp"];
 
 self.addEventListener("install", event => {
@@ -35,24 +35,18 @@ self.addEventListener("fetch", event => {
       !url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
 
   event.respondWith((async () => {
-    const cache = await caches.open(CACHE);
-    const cached = await cache.match(request, { ignoreSearch: true }) ||
-      await cache.match("./index.html");
-
-    const update = fetch(request).then(async response => {
-      if (response.ok) {
-        try { await cache.put(request, response.clone()); }
-        catch (_) { /* Cache quota / private-mode restrictions. */ }
+    const cache=await caches.open(CACHE);
+    try{
+      const fresh=await fetch(request,{cache:"no-store"});
+      if(fresh.ok){
+        try{await cache.put(request,fresh.clone());}catch(_){}
+        return fresh;
       }
-      return response;
-    });
-
-    if (cached) {
-      event.waitUntil(update.catch(() => {}));
-      return cached;
+      throw new Error("HTTP "+fresh.status);
+    }catch(_){
+      return await cache.match(request,{ignoreSearch:true}) ||
+        await cache.match("./index.html") || Response.error();
     }
-    try { return await update; }
-    catch { return Response.error(); }
   })());
 });
 
@@ -61,7 +55,10 @@ self.addEventListener("fetch", event => {
  const req=event.request, url=new URL(req.url);
  if(req.method!=="GET" || url.origin!==self.location.origin ||
     url.pathname!==new URL("./push.js",self.registration.scope).pathname)return;
- event.respondWith(caches.match(req).then(hit=>hit||fetch(req)));
+ event.respondWith(fetch(req,{cache:"no-store"}).then(async response=>{
+  if(response.ok){try{const cache=await caches.open(CACHE);await cache.put(req,response.clone());}catch(_){}}
+  return response;
+ }).catch(()=>caches.match(req).then(hit=>hit||Response.error())));
 });
 
 self.addEventListener("push",event=>{
