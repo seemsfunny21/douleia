@@ -706,7 +706,15 @@ dialog .buttons>button{text-align:center}
   localStorage.setItem(STORAGE,JSON.stringify(v));return v;
  }
  const supported=()=>window.isSecureContext&&"Notification" in window&&"PushManager" in window&&"serviceWorker" in navigator;
- let busy=false,enabled=false,keyPromise=null;
+ let busy=false,enabled=false,keyPromise=null,lastTestAt=0,cooldownTimer=null;
+ function markTestSent(){
+  lastTestAt=Date.now();
+  if(cooldownTimer)clearInterval(cooldownTimer);
+  cooldownTimer=setInterval(()=>{
+   if(Date.now()-lastTestAt>=45000){clearInterval(cooldownTimer);cooldownTimer=null;}
+   state($("pushStatus")?.textContent||"");
+  },1000);
+ }
  function state(note=""){
   const status=$("pushStatus"),enable=$("pushEnable"),test=$("pushTest"),disable=$("pushDisable");
   if(!status)return;
@@ -717,7 +725,9 @@ dialog .buttons>button{text-align:center}
   enable.hidden=enabled||embedded;test.hidden=!enabled;disable.hidden=!enabled;
   enable.disabled=busy;
   enable.title=!supported()?"Πάτησε για οδηγίες υποστήριξης ειδοποιήσεων":"";
-  test.disabled=busy||!permitted;disable.disabled=busy;
+  const seconds=Math.max(0,Math.ceil((lastTestAt+45000-Date.now())/1000));
+  test.textContent=seconds?"Δοκιμή σε "+seconds+"″":"Δοκιμή push";
+  test.disabled=busy||!permitted||seconds>0;disable.disabled=busy;
  }
  async function call(action,data={}){
   const response=await fetch(API,{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json"},
@@ -760,13 +770,14 @@ dialog .buttons>button{text-align:center}
    state("Σύνδεση της συσκευής με την υπηρεσία Push…");
    await connect(true);
    await call("test",getCredentials());
+   markTestSent();
    state("Ενεργές ειδοποιήσεις — στάλθηκε δοκιμαστικό push.");
   }catch(e){state((e?.name==="AbortError"?"Η εγγραφή Push διακόπηκε. Έλεγξε τη σύνδεση και ξαναπροσπάθησε.":e?.message)||"Αδυναμία ενεργοποίησης.");}
   finally{busy=false;state($("pushStatus")?.textContent||"");}
  }
  async function test(){
   if(busy)return;busy=true;state("Αποστολή δοκιμαστικής ειδοποίησης…");
-  try{await call("test",getCredentials());state("Το δοκιμαστικό push στάλθηκε στη συσκευή.");}
+  try{await call("test",getCredentials());markTestSent();state("Το δοκιμαστικό push στάλθηκε στη συσκευή.");}
   catch(e){state(e.message||"Αποτυχία δοκιμής.");}
   finally{busy=false;state($("pushStatus")?.textContent||"");}
  }
