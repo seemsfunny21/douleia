@@ -639,6 +639,9 @@ dialog::backdrop{background:#010817c9;backdrop-filter:blur(3px)}
  .routes-hero-art{border-radius:12px!important}
 }
 
+/* Center a single confirmation action in route dialogs */
+dialog .buttons>button:only-child{grid-column:1/-1;justify-self:center;width:min(100%,260px);text-align:center}
+dialog .buttons>button{text-align:center}
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header class="routes-hero-head"><img src="./hero-banner.webp" class="routes-hero-art" alt="Δρομολόγια — οδηγοί, χρόνοι και ιστορικό" width="900" height="300" decoding="async"><h1 class="sr-only">Δρομολόγια</h1></header>
