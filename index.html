@@ -643,16 +643,18 @@ dialog::backdrop{background:#010817c9;backdrop-filter:blur(3px)}
 dialog .buttons>button:only-child{grid-column:1/-1;justify-self:center;width:min(100%,260px);text-align:center}
 dialog .buttons>button{text-align:center}
 
-/* Compact notification settings: closed by default so route cards stay foremost. */
-.route-settings{max-width:650px;margin:0 auto 10px;position:relative}
-.route-settings>summary{list-style:none;display:flex;align-items:center;justify-content:flex-end;width:max-content;max-width:100%;gap:7px;margin:0 0 0 auto;padding:7px 12px;border:1px solid #5083c4;border-radius:999px;background:linear-gradient(145deg,#1b416e,#193359);color:#e4f2ff;box-shadow:0 3px 15px #0006,0 0 13px #478af326;font-size:12px;font-weight:700;cursor:pointer;user-select:none;min-height:36px}
+/* Persistent settings cog beside the heading on every tab. */
+.page-headbar{position:relative;z-index:22;max-width:650px;margin:20px auto 14px;min-height:40px;display:flex;align-items:center;justify-content:center;gap:12px}
+.page-headbar h2{font-size:19px;text-align:center;margin:0;min-width:0;line-height:1.25}
+.route-settings{position:static;flex:0 0 auto;max-width:none;margin:0}
+.route-settings>summary{list-style:none;display:grid;place-items:center;width:38px;height:38px;padding:0;border:1px solid #578fd1;border-radius:12px;background:linear-gradient(145deg,#204c83,#16355c);color:#e4f2ff;box-shadow:0 4px 16px #0006,0 0 11px #478af333;cursor:pointer;user-select:none}
 .route-settings>summary::-webkit-details-marker{display:none}
 .route-settings>summary::marker{content:""}
-.route-settings>summary:hover{border-color:#8abaff;background:#24568a}
+.route-settings>summary:hover{border-color:#a0c8ff;background:#2b619c}
 .route-settings>summary:focus-visible{outline:3px solid #9dccff;outline-offset:3px}
-.route-settings>summary .settings-gear{display:inline-grid;place-items:center;font-size:18px;line-height:1}
-.route-settings[open]>summary{border-radius:12px 12px 0 0;background:#285a93}
-.route-settings>.push-panel{margin:0;border-radius:16px 0 16px 16px;border-color:#5083c4;animation:route-settings-open .16s ease-out}
+.route-settings>summary .settings-gear{font-size:21px;line-height:1;display:inline-grid;place-items:center}
+.route-settings[open]>summary{background:#2a64a4;border-color:#91bfff}
+.route-settings>.push-panel{position:absolute;right:0;top:calc(100% + 5px);z-index:23;width:min(350px,100%);margin:0;border-radius:15px;border-color:#578fd1;animation:route-settings-open .16s ease-out}
 @keyframes route-settings-open{from{opacity:.6;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.route-settings>.push-panel{animation:none}}
 
@@ -669,8 +671,10 @@ dialog .buttons>button{text-align:center}
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header class="routes-hero-head"><img src="./hero-banner.webp" class="routes-hero-art" alt="Δρομολόγια — οδηγοί, χρόνοι και ιστορικό" width="900" height="300" decoding="async"><h1 class="sr-only">Δρομολόγια</h1></header>
+<div class="page-headbar">
+<h2 id="pageHeading">Σήμερα</h2>
 <details class="route-settings" id="routeSettings" data-no-swipe>
-<summary aria-label="Άνοιγμα ρυθμίσεων ειδοποιήσεων"><span class="settings-gear" aria-hidden="true">⚙</span> Ρυθμίσεις</summary>
+<summary aria-label="Ρυθμίσεις ειδοποιήσεων" title="Ρυθμίσεις ειδοποιήσεων"><span class="settings-gear" aria-hidden="true">⚙</span></summary>
 <section class="push-panel" id="douleiaPush" aria-label="Ειδοποιήσεις δρομολογίων">
 <div class="push-label">🔔 Ειδοποιήσεις δρομολογίων</div>
 <p class="push-status" id="pushStatus" aria-live="polite">Ειδοποιήσεις καθυστέρησης αναχώρησης και άφιξης.</p>
@@ -680,6 +684,7 @@ dialog .buttons>button{text-align:center}
 <button type="button" id="pushDisable" hidden>Απενεργοποίηση</button>
 </div><a id="pushStandalone" href="./" target="_blank" rel="noopener" hidden>Άνοιγμα Δρομολογίων για ενεργοποίηση push</a></section>
 </details>
+</div>
 <main id="main" aria-live="polite"><div class="empty">Σύνδεση με τη βάση δεδομένων…</div></main>
 
 </div></div>
@@ -893,11 +898,11 @@ function toast(s,err=false){const x=$("toast");x.textContent=s;x.className="stat
 async function request(action,body=null,params={}){const url=new URL(apiBase,location.href);url.searchParams.set("api",action);for(const [k,v] of Object.entries(params))url.searchParams.set(k,String(v));const opts={cache:"no-store"};if(body){opts.method="POST";opts.headers={"Content-Type":"application/json"};opts.body=JSON.stringify(body);}const r=await fetch(url,opts);let data;try{data=await r.json()}catch{throw Error("Δεν ήταν δυνατή η επικοινωνία με τον διακομιστή.");}if(!r.ok||data.error)throw Error(data.error||"Σφάλμα διακομιστή");return data;}
 async function refresh(show=true){if(busy&&show)return;try{const result=await request("state");state=result;if(tab==="today"||tab==="stats"||tab==="drivers")render();if(show)toast("Τα δεδομένα ενημερώθηκαν.");}catch(e){toast(e.message,true);if(!state.routes.length)$("main").innerHTML='<div class="empty">Αδυναμία σύνδεσης. Έλεγξε το Internet και πάτησε επανάληψη.<div class="action-row"><button class="btn" data-do="refresh">Επανάληψη</button></div></div>';}}
 async function doAction(action,body){if(busy)return;busy=true;document.querySelectorAll("button").forEach(b=>{if(b.dataset.do)b.disabled=true});try{await request(action,body);await refresh(false);if(tab==="history")await loadHistory();toast(action==="start"?"Η αναχώρηση καταχωρίστηκε.":action==="arrive"?"Η άφιξη καταχωρίστηκε.":"Η καταχώριση αποθηκεύτηκε και συγχρονίστηκε.");return true}catch(e){toast(e.message,true);return false}finally{busy=false;render();}}
-function render(){document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));if(tab==="today")renderToday();else if(tab==="history")renderHistory();else if(tab==="stats")renderStats();else if(tab==="leaves")renderLeaves();else renderDrivers();}
+function render(){const headings={today:"Σήμερα",history:"Ιστορικό ανά ημέρα",stats:"Στατιστικά",drivers:"Διαχείριση οδηγών",leaves:"Άδειες προσωπικού"};$("pageHeading").textContent=headings[tab]||"Σήμερα";document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));if(tab==="today")renderToday();else if(tab==="history")renderHistory();else if(tab==="stats")renderStats();else if(tab==="leaves")renderLeaves();else renderDrivers();}
 function renderToday(){
  const done=state.today.filter(r=>!!r.arrival_at).length,open=state.today.filter(r=>!r.arrival_at).length;
  const day=state.todayDate||localDay(),work=isWorkday(day);
- let s='<h2>Σήμερα</h2><p class="meta">'+dayLabel(day)+' · '+open+' στον δρόμο · '+done+' ολοκληρώθηκαν</p>';
+ let s='<p class="meta">'+dayLabel(day)+' · '+open+' στον δρόμο · '+done+' ολοκληρώθηκαν</p>';
  if(!work)s+='<p class="empty">Σαββατοκύριακο — δεν υπάρχουν προγραμματισμένες αναχωρήσεις.</p>';
  s+='<div class="route-grid">';
  for(const r of state.routes){
@@ -931,7 +936,7 @@ function renderToday(){
 
 function renderStats(){
  const all=statsHistoryReady?completedStatsRows(statsHistory):[];
- let html='<h2>Στατιστικά</h2><div class="stats-month-nav"><button type="button" class="mini-btn" data-stats-month="-1" aria-label="Προηγούμενος μήνας">‹</button><strong>'+safe(statsMonthLabel(statsMonth))+'</strong><button type="button" class="mini-btn" data-stats-month="1" aria-label="Επόμενος μήνας">›</button></div>';
+ let html='<div class="stats-month-nav"><button type="button" class="mini-btn" data-stats-month="-1" aria-label="Προηγούμενος μήνας">‹</button><strong>'+safe(statsMonthLabel(statsMonth))+'</strong><button type="button" class="mini-btn" data-stats-month="1" aria-label="Επόμενος μήνας">›</button></div>';
  if(!statsHistoryReady){
   html+='<div class="empty">'+(statsHistoryLoading?'Φόρτωση…':'Δεν υπάρχουν διαθέσιμα στοιχεία.')+'</div>';
   $("main").innerHTML=html;return;
@@ -991,7 +996,7 @@ function historyDayHeading(day){
  return (weekday?weekday.charAt(0).toLocaleUpperCase("el-GR")+weekday.slice(1)+" · ":"")+dayLabel(day);
 }
 function renderHistory(){
- let html='<h2>Ιστορικό ανά ημέρα</h2><p class="meta history-range">'+dayLabel(histFrom)+' – '+dayLabel(histTo)+'</p>';
+ let html='<p class="meta history-range">'+dayLabel(histFrom)+' – '+dayLabel(histTo)+'</p>';
  html+='<div class="action-row history-tools"><button class="btn secondary" data-do="toggle-filters" aria-expanded="'+historyFiltersOpen+'">'+(historyFiltersOpen?"Κλείσιμο φίλτρων":"Φίλτρα · CSV")+'</button></div>';
  if(historyFiltersOpen){
   html+='<div class="toolbar"><label class="field">Από<input type="date" id="histFrom" value="'+safe(histFrom)+'"></label><label class="field">Έως<input type="date" id="histTo" value="'+safe(histTo)+'"></label><label class="field">Δρομολόγιο<select id="histRoute"><option value="">Όλα</option>'+state.routes.map(r=>'<option value="'+safe(r.code)+'" '+(routeFilter===r.code?"selected":"")+'>'+safe(r.name)+'</option>').join("")+'</select></label><label class="field">Οδηγός<select id="histDriver"><option value="">Όλοι</option>'+state.drivers.map(d=>'<option value="'+safe(d.id)+'" '+(driverFilter===d.id?"selected":"")+'>'+safe(d.name)+'</option>').join("")+'</select></label><button class="btn" data-do="history-load">Αναζήτηση</button><button class="btn secondary" data-do="export">CSV</button></div>';
@@ -1038,7 +1043,7 @@ function renderHistory(){
  $("main").innerHTML=html+'</div>';
 }
 function renderDrivers(){
- let s='<h2>Διαχείριση οδηγών</h2><section class="card driver-admin-panel"><button class="btn full" data-do="driver-add">+ Νέος οδηγός</button><p class="sub driver-admin-note">Οι απενεργοποιημένοι οδηγοί παραμένουν στο ιστορικό.</p><div class="driver-admin-grid">';
+ let s='<section class="card driver-admin-panel"><button class="btn full" data-do="driver-add">+ Νέος οδηγός</button><p class="sub driver-admin-note">Οι απενεργοποιημένοι οδηγοί παραμένουν στο ιστορικό.</p><div class="driver-admin-grid">';
  for(const d of state.drivers){
   s+='<div class="driver-admin-item"><div class="identity"><strong>'+safe(d.name)+'</strong><div class="sub">'+(d.is_active?"Ενεργός":"Ανενεργός")+'</div></div><div class="actions"><button type="button" class="mini-btn" data-do="driver-rename" data-id="'+safe(d.id)+'">Όνομα</button><button type="button" class="mini-btn" data-do="driver-toggle" data-id="'+safe(d.id)+'">'+(d.is_active?"Απενεργοποίηση":"Ενεργοποίηση")+'</button></div></div>';
  }
@@ -1149,7 +1154,7 @@ function renderLeaves(){
  if(weekFirst.getUTCDay()===6||weekFirst.getUTCDay()===0)weekFirst.setUTCDate(weekFirst.getUTCDate()+7);
  const first=weekFirst.toISOString().slice(0,10);
  const last=new Date(first+"T12:00:00Z");last.setUTCDate(last.getUTCDate()+4);
- let html='<h2>Άδειες προσωπικού</h2><p class="meta">Σήμερα '+dayLabel(date)+' · '+ongoing.length+' σε άδεια</p>';
+ let html='<p class="meta">Σήμερα '+dayLabel(date)+' · '+ongoing.length+' σε άδεια</p>';
  html+='<section class="card"><h3 style="text-align:center;margin:0 0 12px">Νέα άδεια</h3><p class="sub" style="text-align:center">Πάτησε το όνομα του εργαζομένου</p><div class="driver-grid">';
  html+=active.map(p=>'<button type="button" class="driver-choice'+(leaveChoice===p.id?' leave-selected':'')+'" data-leave="choose" data-id="'+safe(p.id)+'" aria-pressed="'+(leaveChoice===p.id)+'">'+safe(p.name)+'</button>').join("");
  html+='</div>';
