@@ -18,8 +18,10 @@
   const status=$("pushStatus"),enable=$("pushEnable"),test=$("pushTest"),disable=$("pushDisable");
   if(!status)return;
   const permitted=supported()&&Notification.permission==="granted";
-  status.textContent=note || (!supported()?"Η συσκευή δεν υποστηρίζει Web Push.":enabled?"Οι ειδοποιήσεις είναι ενεργές.":Notification.permission==="denied"?"Οι ειδοποιήσεις έχουν αποκλειστεί στον browser.":"Ειδοποιήσεις καθυστέρησης αναχώρησης και άφιξης.");
-  enable.hidden=enabled;test.hidden=!enabled;disable.hidden=!enabled;
+  const embedded=window.top!==window.self;
+  if($("pushStandalone"))$("pushStandalone").hidden=!embedded;
+  status.textContent=note || (embedded&&!enabled?"Άνοιξε τα Δρομολόγια ξεχωριστά για να επιτρέψεις τις ειδοποιήσεις.":!supported()?"Η συσκευή δεν υποστηρίζει Web Push.":enabled?"Οι ειδοποιήσεις είναι ενεργές.":Notification.permission==="denied"?"Οι ειδοποιήσεις έχουν αποκλειστεί στον browser.":"Ειδοποιήσεις καθυστέρησης αναχώρησης και άφιξης.");
+  enable.hidden=enabled||embedded;test.hidden=!enabled;disable.hidden=!enabled;
   enable.disabled=busy||!supported()||Notification.permission==="denied";
   test.disabled=busy||!permitted;disable.disabled=busy;
  }
