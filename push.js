@@ -22,7 +22,8 @@
   if($("pushStandalone"))$("pushStandalone").hidden=!embedded;
   status.textContent=note || (embedded&&!enabled?"Άνοιξε τα Δρομολόγια ξεχωριστά για να επιτρέψεις τις ειδοποιήσεις.":!supported()?"Η συσκευή δεν υποστηρίζει Web Push.":enabled?"Οι ειδοποιήσεις είναι ενεργές.":Notification.permission==="denied"?"Οι ειδοποιήσεις έχουν αποκλειστεί στον browser.":"Ειδοποιήσεις καθυστέρησης αναχώρησης και άφιξης.");
   enable.hidden=enabled||embedded;test.hidden=!enabled;disable.hidden=!enabled;
-  enable.disabled=busy||!supported()||Notification.permission==="denied";
+  enable.disabled=busy;
+  enable.title=!supported()?"Πάτησε για οδηγίες υποστήριξης ειδοποιήσεων":"";
   test.disabled=busy||!permitted;disable.disabled=busy;
  }
  async function call(action,data={}){
@@ -57,15 +58,17 @@
  async function enable(){
   if(busy)return;busy=true;state("Ενεργοποίηση ειδοποιήσεων…");
   try{
-   if(!supported())throw new Error("Χρειάζεται εγκατεστημένη εφαρμογή και συμβατός HTTPS browser.");
+   if(!supported())throw new Error("Αυτό το περιβάλλον δεν υποστηρίζει Web Push. Άνοιξε τα Δρομολόγια απευθείας στον Chrome και όχι μέσα σε άλλη εφαρμογή.");
+   if(Notification.permission==="denied")throw new Error("Οι ειδοποιήσεις είναι αποκλεισμένες. Άνοιξε τις ρυθμίσεις του Chrome → Δικαιώματα ιστοτόπου → Ειδοποιήσεις και επέτρεψέ τες.");
    if(window.top!==window.self)throw new Error("Άνοιξε τα Δρομολόγια σε ξεχωριστό παράθυρο για να δώσεις άδεια.");
    const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
    if(permission!=="granted")throw new Error("Δεν δόθηκε άδεια ειδοποιήσεων.");
    await getKey();
+   state("Σύνδεση της συσκευής με την υπηρεσία Push…");
    await connect(true);
    await call("test",getCredentials());
    state("Ενεργές ειδοποιήσεις — στάλθηκε δοκιμαστικό push.");
-  }catch(e){state(e.message||"Αδυναμία ενεργοποίησης.");}
+  }catch(e){state((e?.name==="AbortError"?"Η εγγραφή Push διακόπηκε. Έλεγξε τη σύνδεση και ξαναπροσπάθησε.":e?.message)||"Αδυναμία ενεργοποίησης.");}
   finally{busy=false;state($("pushStatus")?.textContent||"");}
  }
  async function test(){
@@ -94,6 +97,7 @@
   try{await getKey();await connect(false);}
   catch(e){console.warn("Douleia Push reconnect:",e);state("Δεν έγινε σύνδεση Push. Πάτησε Ενεργοποίηση.");}
  }
+ window.DouleiaPushDiagnostics={supported,permission:()=>("Notification" in window?Notification.permission:"unsupported"),registered:()=>enabled};
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
  else init();
 })();
