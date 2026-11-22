@@ -677,7 +677,7 @@ dialog .buttons>button{text-align:center}
 <summary aria-label="Ρυθμίσεις ειδοποιήσεων" title="Ρυθμίσεις ειδοποιήσεων"><span class="settings-gear" aria-hidden="true">⚙</span></summary>
 <section class="push-panel" id="douleiaPush" aria-label="Ειδοποιήσεις δρομολογίων">
 <div class="push-label">🔔 Ειδοποιήσεις δρομολογίων</div>
-<p class="push-status" id="pushStatus" aria-live="polite">Ειδοποιήσεις καθυστέρησης αναχώρησης και άφιξης.</p>
+<p class="push-status" id="pushStatus" aria-live="polite">Ειδοποιήσεις αναχώρησης, άφιξης και καθυστέρησης.</p>
 <div class="push-actions">
 <button type="button" id="pushEnable">Ενεργοποίηση ειδοποιήσεων</button>
 <button type="button" id="pushTest" hidden>Δοκιμή push</button>
@@ -742,7 +742,7 @@ dialog .buttons>button{text-align:center}
   const permitted=supported()&&Notification.permission==="granted";
   const embedded=window.top!==window.self;
   if($("pushStandalone"))$("pushStandalone").hidden=!embedded;
-  status.textContent=note || (embedded&&!enabled?"Άνοιξε τα Δρομολόγια ξεχωριστά για να επιτρέψεις τις ειδοποιήσεις.":!supported()?"Η συσκευή δεν υποστηρίζει Web Push.":enabled?"Οι ειδοποιήσεις είναι ενεργές.":Notification.permission==="denied"?"Οι ειδοποιήσεις έχουν αποκλειστεί στον browser.":"Ειδοποιήσεις καθυστέρησης αναχώρησης και άφιξης.");
+  status.textContent=note || (embedded&&!enabled?"Άνοιξε τα Δρομολόγια ξεχωριστά για να επιτρέψεις τις ειδοποιήσεις.":!supported()?"Η συσκευή δεν υποστηρίζει Web Push.":enabled?"Push ενεργό · Θα ειδοποιείσαι όταν οδηγός αναχωρεί ή επιστρέφει, καθώς και σε καθυστέρηση.":Notification.permission==="denied"?"Οι ειδοποιήσεις έχουν αποκλειστεί στον browser.":"Ειδοποιήσεις αναχώρησης, άφιξης και καθυστέρησης.");
   enable.hidden=enabled||embedded;test.hidden=!enabled;disable.hidden=!enabled;
   enable.disabled=busy;
   enable.title=!supported()?"Πάτησε για οδηγίες υποστήριξης ειδοποιήσεων":"";
