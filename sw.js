@@ -2,7 +2,7 @@
    caches from voltes, reminder, Pegasus or the applications launcher:
    GitHub Pages apps share the same origin and Cache Storage. */
 const PREFIX = "dromologia-github-neon-";
-const CACHE = PREFIX + "v18-live-push-client";
+const CACHE = PREFIX + "v19-driver-events-push";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./push.js", "./icon.svg","./hero-banner.webp"];
 
 self.addEventListener("install", event => {
@@ -66,10 +66,12 @@ self.addEventListener("push",event=>{
  try{data=event.data?.json()||{};}catch{data={body:event.data?.text()||""};}
  event.waitUntil(self.registration.showNotification(
   typeof data.title==="string"?data.title:"Δρομολόγια",
-  {body:typeof data.body==="string"?data.body:"Υπάρχει καθυστέρηση δρομολογίου.",
+  {body:typeof data.body==="string"?data.body:"Ενημέρωση αναχώρησης ή άφιξης δρομολογίου.",
    icon:new URL("./icon.svg",self.registration.scope).href,
    badge:new URL("./icon.svg",self.registration.scope).href,
    tag:typeof data.tag==="string"?data.tag:"douleia-alert",
+   requireInteraction:true,
+   timestamp:Date.now(),
    data:{url:new URL("./",self.registration.scope).href}}
  ));
 });
