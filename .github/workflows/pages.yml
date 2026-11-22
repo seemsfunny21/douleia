@@ -29,13 +29,15 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p _site
-          cp index.html manifest.webmanifest icon.svg sw.js .nojekyll hero-banner.webp hero-banner.svg _site/
+          cp index.html manifest.webmanifest icon.svg sw.js push.js .nojekyll hero-banner.webp hero-banner.svg _site/
           test -s _site/hero-banner.webp
           test -s _site/hero-banner.svg
       - name: Upload site
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./_site
+      - name: Allow Pages artifact metadata to become available
+        run: sleep 8
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
