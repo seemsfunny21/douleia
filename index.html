@@ -1075,7 +1075,7 @@ async function loadHistory(){
 }
 async function getAllHistory(forExport){let rows=[],offset=0;while(true){const batch=await request("history",null,{from:histFrom,to:histTo,offset,limit:500});rows=rows.concat(batch.rows);if(batch.rows.length<500)break;offset+=500;if(offset>25000)throw Error("Πολύ μεγάλο εύρος. Επίλεξε μικρότερο διάστημα.");}return rows;}
 function toAthensLocal(iso){if(!iso)return "";const p=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Athens",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(iso));return p.replace(" ","T");}
-function toUTC(local){if(!local)return null;const target=Date.parse(local+":00Z");if(!Number.isFinite(target))throw Error("Μη έγκυρη ημερομηνία.");let t=target;for(let i=0;i<4;i++){const p=toAthensLocal(new Date(t).toISOString());const actual=Date.parse(p+":00Z");t+=target-actual;}return new Date(t).toISOString();}
+function toUTC(local){if(!local)return null;const target=Date.parse(local+":00Z");if(!Number.isFinite(target))throw Error("Μη έγκυρη ημερομηνία.");let t=target;for(let i=0;i<4;i++){const p=toAthensLocal(new Date(t).toISOString());const actual=Date.parse(p+":00Z");t+=target-actual;}const result=new Date(t).toISOString();if(toAthensLocal(result)!==local)throw Error("Η συγκεκριμένη ώρα δεν υπάρχει λόγω αλλαγής θερινής ώρας. Επίλεξε άλλη ώρα.");return result;}
 function editRun(id){
  editing=state.today.find(x=>x.id===id)||historyRows.find(x=>x.id===id);
  if(!editing)return toast("Δεν βρέθηκε το δρομολόγιο.",true);
