@@ -699,9 +699,10 @@ dialog .buttons>button{text-align:center}
 <dialog id="editDialog"><h2>Διόρθωση δρομολογίου</h2><form id="editForm">
 <p class="edit-service-day">Δρομολόγιο: <strong id="editRouteLabel"></strong> · <span id="editServiceDay"></span></p>
 <div class="edit-time-grid">
-<label class="field">Ώρα αναχώρησης<input type="time" id="editStartTime" step="60" required></label>
-<label class="field">Ώρα άφιξης<input type="time" id="editEndTime" step="60"></label>
+<label class="field">Ώρα αναχώρησης<input type="text" id="editStartTime" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="ΩΩ:ΛΛ" required></label>
+<label class="field">Ώρα άφιξης<input type="text" id="editEndTime" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="ΩΩ:ΛΛ"></label>
 </div>
+<p class="note" style="margin:0">Άλλαξε τη μία ή και τις δύο ώρες (π.χ. 0930 ή 09:30) και πάτησε μία φορά «Αποθήκευση αλλαγών». Κενή άφιξη σημαίνει ότι το δρομολόγιο παραμένει στον δρόμο.</p>
 <label class="field">Οδηγός<select id="editDriver" required></select></label>
 <details class="edit-date-extra"><summary>Ημερομηνία άφιξης (αν διαφέρει)</summary>
 <label class="field">Ημερομηνία άφιξης<input type="date" id="editEndDate"></label>
@@ -1092,15 +1093,22 @@ function editRun(id){
  $("editDialog").querySelector('[data-do="remove-run"]').textContent=editing.arrival_at?"Διαγραφή καταχώρισης":"Ακύρωση αναχώρησης";
  $("editDialog").querySelector(".edit-date-extra").open=!!end&&end.slice(0,10)!==start.slice(0,10);
  $("editDialog").showModal();
- $("editDriver").focus({preventScroll:true});
+ $("editDialog").querySelector("h2").setAttribute("tabindex","-1");
+ $("editDialog").querySelector("h2").focus({preventScroll:true});
 }
+function parseEditTime(value,optional=false){
+ const raw=String(value).trim();if(!raw&&optional)return "";
+ const m=/^(\d{2}):?(\d{2})$/.exec(raw);
+ if(!m||Number(m[1])>23||Number(m[2])>59)throw Error("Μη έγκυρη ώρα. Χρησιμοποίησε ΩΩ:ΛΛ (π.χ. 09:30).");
+ return m[1]+":"+m[2];
+}
+for(const id of ["editStartTime","editEndTime"]){const field=$(id);field.addEventListener("focus",()=>field.select());field.addEventListener("input",()=>{const digits=field.value.replace(/\D/g,"").slice(0,4);if(digits.length===4)field.value=digits.slice(0,2)+":"+digits.slice(2);});field.addEventListener("blur",()=>{try{field.value=parseEditTime(field.value,id==="editEndTime");}catch{}});}
+$("editForm").addEventListener("submit",event=>event.preventDefault());
 function correctionPayload(){
  if(!editing)throw Error("Δεν έχει επιλεγεί καταχώριση.");
  const original=toAthensLocal(editing.departure_at);
- const departureTime=$("editStartTime").value;
- const arrivalTime=$("editEndTime").value;
- if(!$("editStartTime").checkValidity()||!departureTime)throw Error("Συμπλήρωσε έγκυρη ώρα αναχώρησης.");
- if(arrivalTime&&!$("editEndTime").checkValidity())throw Error("Συμπλήρωσε έγκυρη ώρα άφιξης.");
+ const departureTime=parseEditTime($("editStartTime").value);
+ const arrivalTime=parseEditTime($("editEndTime").value,true);
  const arrivalDate=$("editEndDate").value||original.slice(0,10);
  if(arrivalTime&&(!arrivalDate||!$("editEndDate").checkValidity()))throw Error("Μη έγκυρη ημερομηνία άφιξης.");
  const p_departure=toUTC(original.slice(0,10)+"T"+departureTime);
