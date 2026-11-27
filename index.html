@@ -898,7 +898,7 @@ const routeAvg=route=>state.routeStats.find(x=>x.route_code===route);
 function toast(s,err=false){const x=$("toast");x.textContent=s;x.className="status"+(err?" error":"");clearTimeout(toast.timer);toast.timer=setTimeout(()=>x.className="status hidden",4500);}
 async function request(action,body=null,params={}){const url=new URL(apiBase,location.href);url.searchParams.set("api",action);for(const [k,v] of Object.entries(params))url.searchParams.set(k,String(v));const opts={cache:"no-store"};if(body){opts.method="POST";opts.headers={"Content-Type":"application/json"};opts.body=JSON.stringify(body);}const r=await fetch(url,opts);let data;try{data=await r.json()}catch{throw Error("Δεν ήταν δυνατή η επικοινωνία με τον διακομιστή.");}if(!r.ok||data.error)throw Error(data.error||"Σφάλμα διακομιστή");return data;}
 async function refresh(show=true){if(busy&&show)return;try{const result=await request("state");state=result;if(tab==="today"||tab==="stats"||tab==="drivers")render();if(show)toast("Τα δεδομένα ενημερώθηκαν.");}catch(e){toast(e.message,true);if(!state.routes.length)$("main").innerHTML='<div class="empty">Αδυναμία σύνδεσης. Έλεγξε το Internet και πάτησε επανάληψη.<div class="action-row"><button class="btn" data-do="refresh">Επανάληψη</button></div></div>';}}
-async function doAction(action,body){if(busy)return;busy=true;document.querySelectorAll("button").forEach(b=>{if(b.dataset.do)b.disabled=true});try{await request(action,body);await refresh(false);if(tab==="history")await loadHistory();toast(action==="start"?"Η αναχώρηση καταχωρίστηκε.":action==="arrive"?"Η άφιξη καταχωρίστηκε.":"Η καταχώριση αποθηκεύτηκε και συγχρονίστηκε.");return true}catch(e){toast(e.message,true);return false}finally{busy=false;render();}}
+async function doAction(action,body){if(busy)return;busy=true;const lockedButtons=Array.from(document.querySelectorAll("button")).filter(b=>b.dataset.do&&!b.disabled);lockedButtons.forEach(b=>{b.disabled=true});try{await request(action,body);await refresh(false);if(tab==="history")await loadHistory();toast(action==="start"?"Η αναχώρηση καταχωρίστηκε.":action==="arrive"?"Η άφιξη καταχωρίστηκε.":"Η καταχώριση αποθηκεύτηκε και συγχρονίστηκε.");return true}catch(e){toast(e.message,true);return false}finally{busy=false;lockedButtons.forEach(b=>{b.disabled=false});render();}}
 function render(){const headings={today:"Σήμερα",history:"Ιστορικό ανά ημέρα",stats:"Στατιστικά",drivers:"Διαχείριση οδηγών",leaves:"Άδειες προσωπικού"};$("pageHeading").textContent=headings[tab]||"Σήμερα";document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));if(tab==="today")renderToday();else if(tab==="history")renderHistory();else if(tab==="stats")renderStats();else if(tab==="leaves")renderLeaves();else renderDrivers();}
 function driverBusy(id,except){return state.today.some(r=>r.driver_id===id&&!r.arrival_at&&r.id!==except);}
 const SPLIT_ROUTES_FROM="2026-11-30";
@@ -1103,6 +1103,7 @@ function editRun(id){
  $("editReason").value="";
  $("editDialog").querySelector('[data-do="remove-run"]').textContent=editing.arrival_at?"Διαγραφή καταχώρισης":"Ακύρωση αναχώρησης";
  $("editDialog").querySelector(".edit-date-extra").open=!!end&&end.slice(0,10)!==start.slice(0,10);
+ $("editDialog").querySelectorAll("[data-do]").forEach(b=>{b.disabled=false});
  $("editDialog").showModal();
  $("editDialog").querySelector("h2").setAttribute("tabindex","-1");
  $("editDialog").querySelector("h2").focus({preventScroll:true});
@@ -1122,8 +1123,10 @@ function correctionPayload(){
  const arrivalTime=parseEditTime($("editEndTime").value,true);
  const arrivalDate=$("editEndDate").value||original.slice(0,10);
  if(arrivalTime&&(!arrivalDate||!$("editEndDate").checkValidity()))throw Error("Μη έγκυρη ημερομηνία άφιξης.");
- const p_departure=toUTC(original.slice(0,10)+"T"+departureTime);
- const p_arrival=arrivalTime?toUTC(arrivalDate+"T"+arrivalTime):null;
+ // Keep exact stored timestamps when the visible minute has not changed.
+ const originalEnd=toAthensLocal(editing.arrival_at);
+ const p_departure=departureTime===original.slice(11,16)?editing.departure_at:toUTC(original.slice(0,10)+"T"+departureTime);
+ const p_arrival=arrivalTime?(originalEnd&&arrivalDate+"T"+arrivalTime===originalEnd?editing.arrival_at:toUTC(arrivalDate+"T"+arrivalTime)):null;
  if(p_arrival && Date.parse(p_arrival)<Date.parse(p_departure))
   throw Error("Η άφιξη προηγείται της αναχώρησης. Αν έγινε την επόμενη ημέρα, επίλεξε την ημερομηνία άφιξης.");
  if(!p_arrival&&driverBusy($("editDriver").value,editing.id))throw Error("Ο οδηγός βρίσκεται ήδη σε δρομολόγιο.");
