@@ -668,6 +668,7 @@ dialog .buttons>button{text-align:center}
 .push-panel button:hover{background:#2875bc}
 
 #pushStandalone{display:inline-block;color:#a9d2ff;font-size:12px;margin-top:7px;text-decoration:underline}#pushStandalone[hidden]{display:none!important}
+ .route-avatar{display:inline-grid;place-items:center;flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:#356292;color:#fff;font-size:13px;font-weight:800;overflow:hidden;border:1px solid #78a5d6}.route-avatar img{width:100%;height:100%;object-fit:cover}.route-driver-identity{display:inline-flex;align-items:center;gap:8px;min-width:0}.driver-choice{display:flex;align-items:center;gap:5px;text-align:left;justify-content:flex-start;font-size:13px;min-height:44px;padding:5px 6px}.driver-choice .route-avatar{width:30px;height:30px;font-size:11px}.driver-choice .route-driver-identity{gap:5px}.driver-choice small{font-size:10px;display:block}.driver-name .route-avatar{width:40px;height:40px}.edit-driver-tiles .driver-choice.selected{border:2px solid #9ed5ff;background:#2868a9}.stats-driver-name .route-driver-identity{font-size:inherit}@media(max-width:350px){.driver-choice .route-avatar{width:25px;height:25px}.driver-choice{font-size:12px;padding:4px}} 
 </style></head>
 <body><div id="scroll"><div class="wrap">
 <header class="routes-hero-head"><img src="./hero-banner.webp" class="routes-hero-art" alt="Δρομολόγια — οδηγοί, χρόνοι και ιστορικό" width="900" height="300" decoding="async"><h1 class="sr-only">Δρομολόγια</h1></header>
@@ -701,7 +702,7 @@ dialog .buttons>button{text-align:center}
 <label class="field">Ώρα άφιξης<input type="text" id="editEndTime" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="ΩΩ:ΛΛ"></label>
 </div>
 <p class="note" style="margin:0">Άλλαξε τη μία ή και τις δύο ώρες (π.χ. 0930 ή 09:30) και πάτησε μία φορά «Αποθήκευση αλλαγών». Κενή άφιξη σημαίνει ότι το δρομολόγιο παραμένει στον δρόμο.</p>
-<label class="field">Οδηγός<select id="editDriver" required></select></label>
+<div class="field">Οδηγός<select id="editDriver" hidden required></select><div id="editDriverTiles" class="driver-grid edit-driver-tiles" role="group" aria-label="Επιλογή οδηγού"></div></div>
 <details class="edit-date-extra"><summary>Ημερομηνία άφιξης (αν διαφέρει)</summary>
 <label class="field">Ημερομηνία άφιξης<input type="date" id="editEndDate"></label>
 </details>
@@ -891,6 +892,17 @@ const duration=sec=>sec==null?"—":(Math.floor(sec/3600)>0?Math.floor(sec/3600)
 const delta=sec=>sec==null?"—":(sec>0?"+":sec<0?"−":"±")+Math.round(Math.abs(sec)/60)+"λ";
 const routeName=code=>state.routes.find(x=>x.code===code)?.name||code;
 const driverName=id=>state.drivers.find(x=>x.id===id)?.name||"Άγνωστος";
+const WORK_SESSION="predictions-session-v1",WORK_DIRECTORY="https://oikcdjnxkmgrpyedxera.supabase.co/functions/v1/work-directory",PRED_AUTH="https://zrbmsziipzabnniqcpav.supabase.co/functions/v1/predictions-account";
+let driverPhotos=new Map(),avatarSession="",avatarAt=0,avatarBusy=false;
+function routeSession(){try{return localStorage.getItem(WORK_SESSION)||""}catch{return ""}}
+function driverAvatar(id){const name=driverName(id),photo=avatarSession===routeSession()?driverPhotos.get(id):null;return '<span class="route-avatar" aria-hidden="true">'+(photo?'<img alt="" src="'+safe(photo)+'">':safe(name.split(/\s+/).slice(0,2).map(s=>s[0]||"").join("").toUpperCase()))+'</span>'}
+function driverIdentity(id){return '<span class="route-driver-identity">'+driverAvatar(id)+'<span>'+safe(driverName(id))+'</span></span>'}
+async function refreshDriverPhotos(){const token=routeSession();if(!token){if(driverPhotos.size){driverPhotos.clear();avatarSession="";if(!$("editDialog").open)render()}return}if(avatarBusy||token===avatarSession&&Date.now()-avatarAt<300000)return;avatarBusy=true;
+ try{const get=async(url,action)=>{const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-predictions-session":token},body:JSON.stringify({action}),cache:"no-store",signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error("Avatar access");return r.json()};const [links,photos]=await Promise.all([get(WORK_DIRECTORY,"driver_avatar_links"),get(PRED_AUTH,"work_photos")]);if(routeSession()!==token)return;
+ const valid=new Map((photos.photos||[]).filter(p=>typeof p.avatar==="string"&&p.avatar.length<=100000&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(p.avatar)).map(p=>[p.staff_id,p.avatar]));
+ driverPhotos=new Map((links.links||[]).filter(l=>valid.has(l.staff_id)).map(l=>[l.driver_id,valid.get(l.staff_id)]));avatarSession=token;avatarAt=Date.now();if(!$("editDialog").open)render();
+ }catch{driverPhotos.clear();avatarSession="";avatarAt=0;if(!$("editDialog").open)render()}finally{avatarBusy=false}}
+
 const countSamples=(driver,route)=>state.stats.find(x=>x.driver_id===driver&&x.route_code===route);
 const routeAvg=route=>state.routeStats.find(x=>x.route_code===route);
 function toast(s,err=false){const x=$("toast");x.textContent=s;x.className="status"+(err?" error":"");clearTimeout(toast.timer);toast.timer=setTimeout(()=>x.className="status hidden",4500);}
@@ -924,13 +936,13 @@ function renderToday(){
    const drivers=state.drivers.filter(d=>d.is_active);
    s+='<p class="driver-instruction">Αναχώρηση · πάτησε τον οδηγό</p>';
    if(drivers.length){
-    s+='<div class="driver-grid" role="group" aria-label="Επιλογή οδηγού για άμεση αναχώρηση στο '+safe(r.name)+'">'+drivers.map(d=>'<button type="button" class="driver-choice" data-do="start-driver" data-route="'+safe(r.code)+'" data-driver="'+safe(d.id)+'" aria-label="Αναχώρηση '+safe(r.name)+' με οδηγό '+safe(d.name)+'" '+(!work||driverBusy(d.id)?"disabled":"")+'>'+safe(d.name)+(driverBusy(d.id)?" · Σε δρομολόγιο":"")+'</button>').join("")+'</div>';
+    s+='<div class="driver-grid" role="group" aria-label="Επιλογή οδηγού για άμεση αναχώρηση στο '+safe(r.name)+'">'+drivers.map(d=>'<button type="button" class="driver-choice" data-do="start-driver" data-route="'+safe(r.code)+'" data-driver="'+safe(d.id)+'" aria-label="Αναχώρηση '+safe(r.name)+' με οδηγό '+safe(d.name)+'" '+(!work||driverBusy(d.id)?"disabled":"")+'>'+driverIdentity(d.id)+(driverBusy(d.id)?'<small>Στον δρόμο</small>':"")+'</button>').join("")+'</div>';
    }else{
-    s+='<p class="route-hint">Δεν υπάρχουν ενεργοί οδηγοί. Πρόσθεσε οδηγό από την καρτέλα «Οδηγοί».</p>';
+    s+='<p class="route-hint">Δεν υπάρχουν ενεργοί οδηγοί. Πρόσθεσε οδηγό από την εφαρμογή «Προσωπικό».</p>';
    }
 
   }else{
-   s+='<p class="driver-name">'+safe(driverName(rec.driver_id))+'</p>';
+   s+='<p class="driver-name">'+driverIdentity(rec.driver_id)+'</p>';
    if(!rec.arrival_at){
     s+='<p class="trip-line"><span>Αναχώρηση <b>'+clock(rec.departure_at)+'</b></span><span>Εκτίμηση <b>'+(rec.estimated_return_at?clock(rec.estimated_return_at):"—")+'</b></span></p>';
    }else{
@@ -967,7 +979,7 @@ function renderStats(){
    const driverAvg=statMean(driverRuns);
    const driverKey=route.code+"|"+id;
    html+='<div class="stats-driver-entry"><details class="stats-driver-details" data-route-code="'+safe(route.code)+'" data-driver-id="'+safe(id)+'" '+(statsOpenDriver===driverKey?'open':'')+'>';
-   html+='<summary class="stats-driver-head"><span class="stats-driver-name"><strong>'+safe(driverName(id))+'</strong><small>'+driverRuns.length+' '+statCountWord(driverRuns.length)+'</small></span><span class="stats-driver-average"><small>Μ.Ο.</small><b>'+duration(driverAvg)+'</b></span><span class="compact-stat-chevron" aria-hidden="true">⌄</span></summary>';
+   html+='<summary class="stats-driver-head"><span class="stats-driver-name"><strong>'+driverIdentity(id)+'</strong><small>'+driverRuns.length+' '+statCountWord(driverRuns.length)+'</small></span><span class="stats-driver-average"><small>Μ.Ο.</small><b>'+duration(driverAvg)+'</b></span><span class="compact-stat-chevron" aria-hidden="true">⌄</span></summary>';
    html+='<div class="stats-driver-body">';
    for(const run of driverRuns){
     const actual=lengthSecs(run),diff=best==null?null:actual-best;
@@ -1045,7 +1057,7 @@ function renderHistory(){
    const comparison=completed?historyComparison(rec):null;
    html+='<article class="history-entry'+(completed?"":" history-entry-pending")+'">';
    html+='<div class="history-entry-top"><strong class="history-route-name">'+safe(routeName(rec.route_code))+'</strong><span class="history-time-value"><small>'+(completed?"Διάρκεια":"Κατάσταση")+'</small><b>'+(completed?duration(elapsed):"Στον δρόμο")+'</b></span></div>';
-   html+='<div class="history-entry-meta"><span>'+safe(driverName(rec.driver_id))+'</span><span>'+clock(rec.departure_at)+' → '+clock(rec.arrival_at)+'</span></div>';
+   html+='<div class="history-entry-meta"><span>'+driverIdentity(rec.driver_id)+'</span><span>'+clock(rec.departure_at)+' → '+clock(rec.arrival_at)+'</span></div>';
    html+='<div class="history-entry-bottom"><div class="history-comparison'+(comparison?" is-"+comparison.kind:"")+'">'+(comparison?safe(comparison.label):completed?(historyBaselinesAvailable?"Χωρίς ρεκόρ δρομολογίου":""):"Αναμένεται η άφιξη")+'</div><div class="history-entry-actions">'+(rec.arrival_at?"":'<button type="button" class="mini-btn history-arrive" data-do="arrive" data-id="'+safe(rec.id)+'">Άφιξη</button>')+'<button type="button" class="mini-btn history-edit" data-do="edit" data-id="'+safe(rec.id)+'">Διόρθωση</button></div></div>';
    html+='</article>';
   }
@@ -1086,7 +1098,7 @@ function editRun(id){
  $("editRouteLabel").textContent=routeName(editing.route_code);
  $("editServiceDay").textContent=dayLabel(start.slice(0,10));
  $("editDriver").innerHTML=state.drivers.map(d=>'<option value="'+safe(d.id)+'" '+((!editing.arrival_at&&driverBusy(d.id,editing.id))?"disabled":"")+'>'+safe(d.name)+'</option>').join("");
- $("editDriver").value=editing.driver_id;
+ $("editDriver").value=editing.driver_id;renderEditDriverTiles();
  $("editStartTime").value=start.slice(11,16);
  $("editEndTime").value=end?end.slice(11,16):"";
  $("editEndDate").value=end?end.slice(0,10):start.slice(0,10);
@@ -1098,6 +1110,7 @@ function editRun(id){
  $("editDialog").querySelector("h2").setAttribute("tabindex","-1");
  $("editDialog").querySelector("h2").focus({preventScroll:true});
 }
+function renderEditDriverTiles(){const target=$("editDriverTiles");if(!editing||!target)return;const selected=$("editDriver").value;target.innerHTML=state.drivers.filter(d=>d.is_active||d.id===editing.driver_id).map(d=>'<button type="button" class="driver-choice'+(d.id===selected?" selected":"")+'" aria-pressed="'+(d.id===selected)+'" data-do="pick-edit-driver" data-driver="'+safe(d.id)+'" '+(!editing.arrival_at&&driverBusy(d.id,editing.id)?"disabled":"")+'>'+driverIdentity(d.id)+'</button>').join("")}
 function parseEditTime(value,optional=false){
  const raw=String(value).trim();if(!raw&&optional)return "";
  const m=/^(\d{2}):?(\d{2})$/.exec(raw);
@@ -1126,7 +1139,7 @@ function correctionPayload(){
 }
 async function exportCsv(){const rows=await getAllHistory(true);const picked=rows.filter(x=>(!routeFilter||x.route_code===routeFilter)&&(!driverFilter||x.driver_id===driverFilter));const quote=s=>'"'+String(s??"").replace(/"/g,'""')+'"';const csv=[["Ημερομηνία","Δρομολόγιο","Οδηγός","Αναχώρηση","Άφιξη","Διάρκεια (λεπτά)","Εκτίμηση επιστροφής"].map(quote).join(";")];for(const r of picked)csv.push([r.service_date,routeName(r.route_code),driverName(r.driver_id),clock(r.departure_at),clock(r.arrival_at),lengthSecs(r)==null?"":Math.round(lengthSecs(r)/60),clock(r.estimated_return_at)].map(quote).join(";"));const blob=new Blob(["\uFEFF"+csv.join("\r\n")],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="dromologia_"+histFrom+"_"+histTo+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);toast("Εξαγωγή "+picked.length+" καταχωρίσεων.");}
 document.addEventListener("change",e=>{if(e.target.id==="statRoute"){statRoute=e.target.value;renderStats();}if(e.target.id==="histFrom")histFrom=e.target.value;if(e.target.id==="histTo")histTo=e.target.value;if(e.target.id==="histRoute"){routeFilter=e.target.value;renderHistory();}if(e.target.id==="histDriver"){driverFilter=e.target.value;renderHistory();}});
-document.addEventListener("click",async e=>{const nav=e.target.closest("[data-tab]");if(nav){tab=nav.dataset.tab;render();if(tab==="history")loadHistory();if(tab==="stats")loadStatsHistory();$("scroll").scrollTo({top:0,behavior:"smooth"});return;}const b=e.target.closest("[data-do]");if(!b||busy)return;const act=b.dataset.do,id=b.dataset.id;if(act==="refresh"){refresh();return;}if(act==="expand-combo2"){combo2ExpandedDay=state.todayDate||localDay();renderToday();return;}if(act==="collapse-combo2"){combo2ExpandedDay="";renderToday();return;}if(act==="start-driver"){const route=b.dataset.route,driver=b.dataset.driver;if(!dailyRoutes(state.todayDate||localDay()).some(r=>r.code===route)||!state.drivers.some(d=>d.id===driver&&d.is_active)||state.today.some(r=>r.route_code===route)||driverBusy(driver))return toast("Το δρομολόγιο δεν είναι διαθέσιμο για αναχώρηση.",true);await doAction("start",{p_route:route,p_driver:driver});return;}if(act==="arrive"){if(!confirm("Να καταγραφεί τώρα η άφιξη;"))return;await doAction("arrive",{p_run:id});return;}if(act==="edit"){editRun(id);return;}if(act==="close-edit"){$("editDialog").close();return;}
+document.addEventListener("click",async e=>{const nav=e.target.closest("[data-tab]");if(nav){tab=nav.dataset.tab;render();if(tab==="history")loadHistory();if(tab==="stats")loadStatsHistory();$("scroll").scrollTo({top:0,behavior:"smooth"});return;}const b=e.target.closest("[data-do]");if(!b||busy)return;const act=b.dataset.do,id=b.dataset.id;if(act==="pick-edit-driver"){if(editing&&state.drivers.some(d=>d.id===b.dataset.driver&&(d.is_active||d.id===editing.driver_id))){$("editDriver").value=b.dataset.driver;renderEditDriverTiles()}return;}if(act==="refresh"){refresh();void refreshDriverPhotos();return;}if(act==="expand-combo2"){combo2ExpandedDay=state.todayDate||localDay();renderToday();return;}if(act==="collapse-combo2"){combo2ExpandedDay="";renderToday();return;}if(act==="start-driver"){const route=b.dataset.route,driver=b.dataset.driver;if(!dailyRoutes(state.todayDate||localDay()).some(r=>r.code===route)||!state.drivers.some(d=>d.id===driver&&d.is_active)||state.today.some(r=>r.route_code===route)||driverBusy(driver))return toast("Το δρομολόγιο δεν είναι διαθέσιμο για αναχώρηση.",true);await doAction("start",{p_route:route,p_driver:driver});return;}if(act==="arrive"){if(!confirm("Να καταγραφεί τώρα η άφιξη;"))return;await doAction("arrive",{p_run:id});return;}if(act==="edit"){editRun(id);return;}if(act==="close-edit"){$("editDialog").close();return;}
 if(act==="save-edit"){try{
  const payload=correctionPayload();
  const ok=await doAction("correct",payload);
@@ -1208,5 +1221,5 @@ document.addEventListener("toggle",event=>{
  surface.addEventListener("touchcancel",()=>{start=null;swiped=false},{passive:true});
 })();
 
-(function init(){const now=localDay();histTo=now;const t=new Date(now+"T12:00:00Z");t.setUTCDate(1);histFrom=t.toISOString().slice(0,10);refresh(false);setInterval(()=>{if(document.visibilityState==="visible"&&!$("editDialog").open&&tab==="today")refresh(false)},30000);if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});})();
+(function init(){const now=localDay();histTo=now;const t=new Date(now+"T12:00:00Z");t.setUTCDate(1);histFrom=t.toISOString().slice(0,10);refresh(false);void refreshDriverPhotos();window.addEventListener("storage",e=>{if(e.key===WORK_SESSION||e.key===null){driverPhotos.clear();avatarSession="";avatarAt=0;if(!$("editDialog").open)render();else renderEditDriverTiles();void refreshDriverPhotos()}});setInterval(()=>{if(document.visibilityState==="visible"&&!$("editDialog").open){if(tab==="today")refresh(false);void refreshDriverPhotos()}},30000);if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});})();
 </script></body></html>
