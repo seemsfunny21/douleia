@@ -901,17 +901,28 @@ async function refresh(show=true){if(busy&&show)return;try{const result=await re
 async function doAction(action,body){if(busy)return;busy=true;document.querySelectorAll("button").forEach(b=>{if(b.dataset.do)b.disabled=true});try{await request(action,body);await refresh(false);if(tab==="history")await loadHistory();toast(action==="start"?"Η αναχώρηση καταχωρίστηκε.":action==="arrive"?"Η άφιξη καταχωρίστηκε.":"Η καταχώριση αποθηκεύτηκε και συγχρονίστηκε.");return true}catch(e){toast(e.message,true);return false}finally{busy=false;render();}}
 function render(){const headings={today:"Σήμερα",history:"Ιστορικό ανά ημέρα",stats:"Στατιστικά",drivers:"Διαχείριση οδηγών",leaves:"Άδειες προσωπικού"};$("pageHeading").textContent=headings[tab]||"Σήμερα";document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));if(tab==="today")renderToday();else if(tab==="history")renderHistory();else if(tab==="stats")renderStats();else if(tab==="leaves")renderLeaves();else renderDrivers();}
 function driverBusy(id,except){return state.today.some(r=>r.driver_id===id&&!r.arrival_at&&r.id!==except);}
+const SPLIT_ROUTES_FROM="2026-11-30";
+let combo2ExpandedDay="";
+function dailyRoutes(day,routes=state.routes,runs=state.today){
+ const has=code=>runs.some(r=>r.route_code===code);
+ return routes.filter(r=>has(r.code)||(r.code==="BG"?day<SPLIT_ROUTES_FROM:!["B","G"].includes(r.code)||day>=SPLIT_ROUTES_FROM));
+}
 function renderToday(){
  const done=state.today.filter(r=>!!r.arrival_at).length,open=state.today.filter(r=>!r.arrival_at).length;
  const day=state.todayDate||localDay(),work=isWorkday(day);
  let s='<p class="meta">'+dayLabel(day)+' · '+open+' στον δρόμο · '+done+' ολοκληρώθηκαν</p>';
  if(!work)s+='<p class="empty">Σαββατοκύριακο — δεν υπάρχουν προγραμματισμένες αναχωρήσεις.</p>';
  s+='<div class="route-grid">';
- for(const r of state.routes){
+ for(const r of dailyRoutes(day)){
   const rec=state.today.find(x=>x.route_code===r.code),status=rec?(rec.arrival_at?"done":"active"):"wait";
-  const label=rec?(rec.arrival_at?"Ολοκληρώθηκε":"Στον δρόμο"):"Αναμονή";
+  if(r.code==="COMBO2"&&!rec&&combo2ExpandedDay!==day){
+   if(work)s+='<section class="card route-card"><div class="route-top"><h3>'+safe(r.name)+'</h3><span class="tag wait">Προαιρετικό</span></div><div class="action-row"><button type="button" class="btn secondary" data-do="expand-combo2">+ Προσθήκη 2ου Combo</button></div></section>';
+   continue;
+  }
+  const label=rec?(rec.arrival_at?"Ολοκληρώθηκε":"Στον δρόμο"):r.code==="COMBO2"?"Προαιρετικό":"Αναμονή";
   s+='<section class="card route-card is-'+status+'"><div class="route-top"><h3>'+safe(r.name)+'</h3><span class="tag '+status+'">'+label+'</span></div>';
   if(!rec){
+   if(r.code==="COMBO2")s+='<div class="action-row"><button type="button" class="mini-btn" data-do="collapse-combo2">Δεν θα γίνει</button></div>';
    const drivers=state.drivers.filter(d=>d.is_active);
    s+='<p class="driver-instruction">Αναχώρηση · πάτησε τον οδηγό</p>';
    if(drivers.length){
@@ -1122,7 +1133,7 @@ function correctionPayload(){
 }
 async function exportCsv(){const rows=await getAllHistory(true);const picked=rows.filter(x=>(!routeFilter||x.route_code===routeFilter)&&(!driverFilter||x.driver_id===driverFilter));const quote=s=>'"'+String(s??"").replace(/"/g,'""')+'"';const csv=[["Ημερομηνία","Δρομολόγιο","Οδηγός","Αναχώρηση","Άφιξη","Διάρκεια (λεπτά)","Εκτίμηση επιστροφής"].map(quote).join(";")];for(const r of picked)csv.push([r.service_date,routeName(r.route_code),driverName(r.driver_id),clock(r.departure_at),clock(r.arrival_at),lengthSecs(r)==null?"":Math.round(lengthSecs(r)/60),clock(r.estimated_return_at)].map(quote).join(";"));const blob=new Blob(["\uFEFF"+csv.join("\r\n")],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="dromologia_"+histFrom+"_"+histTo+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);toast("Εξαγωγή "+picked.length+" καταχωρίσεων.");}
 document.addEventListener("change",e=>{if(e.target.id==="statRoute"){statRoute=e.target.value;renderStats();}if(e.target.id==="histFrom")histFrom=e.target.value;if(e.target.id==="histTo")histTo=e.target.value;if(e.target.id==="histRoute"){routeFilter=e.target.value;renderHistory();}if(e.target.id==="histDriver"){driverFilter=e.target.value;renderHistory();}});
-document.addEventListener("click",async e=>{const nav=e.target.closest("[data-tab]");if(nav){tab=nav.dataset.tab;render();if(tab==="history")loadHistory();if(tab==="stats")loadStatsHistory();$("scroll").scrollTo({top:0,behavior:"smooth"});return;}const b=e.target.closest("[data-do]");if(!b||busy)return;const act=b.dataset.do,id=b.dataset.id;if(act==="refresh"){refresh();return;}if(act==="start-driver"){const route=b.dataset.route,driver=b.dataset.driver;if(!state.routes.some(r=>r.code===route)||!state.drivers.some(d=>d.id===driver&&d.is_active)||state.today.some(r=>r.route_code===route)||driverBusy(driver))return toast("Το δρομολόγιο δεν είναι διαθέσιμο για αναχώρηση.",true);await doAction("start",{p_route:route,p_driver:driver});return;}if(act==="arrive"){if(!confirm("Να καταγραφεί τώρα η άφιξη;"))return;await doAction("arrive",{p_run:id});return;}if(act==="edit"){editRun(id);return;}if(act==="close-edit"){$("editDialog").close();return;}
+document.addEventListener("click",async e=>{const nav=e.target.closest("[data-tab]");if(nav){tab=nav.dataset.tab;render();if(tab==="history")loadHistory();if(tab==="stats")loadStatsHistory();$("scroll").scrollTo({top:0,behavior:"smooth"});return;}const b=e.target.closest("[data-do]");if(!b||busy)return;const act=b.dataset.do,id=b.dataset.id;if(act==="refresh"){refresh();return;}if(act==="expand-combo2"){combo2ExpandedDay=state.todayDate||localDay();renderToday();return;}if(act==="collapse-combo2"){combo2ExpandedDay="";renderToday();return;}if(act==="start-driver"){const route=b.dataset.route,driver=b.dataset.driver;if(!dailyRoutes(state.todayDate||localDay()).some(r=>r.code===route)||!state.drivers.some(d=>d.id===driver&&d.is_active)||state.today.some(r=>r.route_code===route)||driverBusy(driver))return toast("Το δρομολόγιο δεν είναι διαθέσιμο για αναχώρηση.",true);await doAction("start",{p_route:route,p_driver:driver});return;}if(act==="arrive"){if(!confirm("Να καταγραφεί τώρα η άφιξη;"))return;await doAction("arrive",{p_run:id});return;}if(act==="edit"){editRun(id);return;}if(act==="close-edit"){$("editDialog").close();return;}
 if(act==="save-edit"){try{
  const payload=correctionPayload();
  const ok=await doAction("correct",payload);
