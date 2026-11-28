@@ -646,17 +646,19 @@ dialog .buttons>button{text-align:center}
 /* Persistent settings cog beside the heading on every tab. */
 .page-headbar{position:relative;z-index:22;max-width:650px;margin:20px auto 14px;min-height:40px;display:flex;align-items:center;justify-content:center;gap:12px}
 .page-headbar h2{font-size:19px;text-align:center;margin:0;min-width:0;line-height:1.25}
-.route-settings{position:static;flex:0 0 auto;max-width:none;margin:0}
-.route-settings>summary{list-style:none;display:grid;place-items:center;width:38px;height:38px;padding:0;border:1px solid #578fd1;border-radius:12px;background:linear-gradient(145deg,#204c83,#16355c);color:#e4f2ff;box-shadow:0 4px 16px #0006,0 0 11px #478af333;cursor:pointer;user-select:none}
-.route-settings>summary::-webkit-details-marker{display:none}
-.route-settings>summary::marker{content:""}
-.route-settings>summary:hover{border-color:#a0c8ff;background:#2b619c}
-.route-settings>summary:focus-visible{outline:3px solid #9dccff;outline-offset:3px}
-.route-settings>summary .settings-gear{font-size:21px;line-height:1;display:inline-grid;place-items:center}
-.route-settings[open]>summary{background:#2a64a4;border-color:#91bfff}
-.route-settings>.push-panel{position:absolute;right:0;top:calc(100% + 5px);z-index:23;width:min(350px,100%);margin:0;border-radius:15px;border-color:#578fd1;animation:route-settings-open .16s ease-out}
-@keyframes route-settings-open{from{opacity:.6;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:reduce){.route-settings>.push-panel{animation:none}}
+.route-settings{display:grid;place-items:center;flex:0 0 auto;width:38px;height:38px;padding:0;border:1px solid #578fd1;border-radius:12px;background:linear-gradient(145deg,#204c83,#16355c);color:#e4f2ff;box-shadow:0 4px 16px #0006,0 0 11px #478af333;cursor:pointer}
+.route-settings:hover,.route-settings[aria-expanded="true"]{border-color:#a0c8ff;background:#2b619c}
+.route-settings .settings-gear{font-size:21px;line-height:1}
+#routeSettingsDialog{width:min(380px,calc(100vw - 28px));max-width:380px;max-height:calc(100dvh - 28px);overflow:auto;padding:16px;border:1px solid #3998ff;border-radius:20px;background:#10263e;box-shadow:0 0 30px #3998ff55,0 16px 70px #000b}
+#routeSettingsDialog::backdrop{background:#030a14a6;backdrop-filter:blur(4px)}
+#routeSettingsDialog .route-settings-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+#routeSettingsDialog .route-settings-head h2{font-size:17px;margin:0;text-align:left}
+#routeSettingsDialog .route-settings-close{width:36px;height:36px;border:1px solid #578fd1;border-radius:10px;background:#203d62;color:#fff;font-size:23px;line-height:1;cursor:pointer}
+#routeSettingsDialog .push-panel{margin:0;padding:0;border:0;background:transparent;box-shadow:none}
+#routeSettingsDialog .push-actions{gap:7px}
+#routeSettingsDialog .app-share-install{margin-top:12px}
+#routeSettingsDialog #pushStandalone:not([hidden]){display:block;margin:10px auto 0;color:#d0e7ff;font-size:12px;line-height:1.5}
+
 
 /* Work-route Web Push: compact always-visible opt-in, independently of tab re-renders. */
 .push-panel{max-width:650px;margin:0 auto 13px;padding:10px 12px;border:1px solid #38669d;border-radius:14px;background:linear-gradient(145deg,#152c4b,#173c65);box-shadow:0 7px 22px #0005;text-align:center}
@@ -723,17 +725,7 @@ dialog .buttons>button{text-align:center}
 <header class="routes-hero-head"><img src="./hero-banner.webp" class="routes-hero-art" alt="Δρομολόγια — οδηγοί, χρόνοι και ιστορικό" width="900" height="300" decoding="async"><h1 class="sr-only">Δρομολόγια</h1></header>
 <div class="page-headbar">
 <h2 id="pageHeading">Σήμερα</h2>
-<details class="route-settings" id="routeSettings" data-no-swipe>
-<summary aria-label="Ρυθμίσεις ειδοποιήσεων" title="Ρυθμίσεις ειδοποιήσεων"><span class="settings-gear" aria-hidden="true">⚙</span></summary>
-<section class="push-panel" id="douleiaPush" aria-label="Ειδοποιήσεις δρομολογίων">
-<div class="push-label">🔔 Ειδοποιήσεις δρομολογίων</div>
-<p class="push-status" id="pushStatus" aria-live="polite">Ειδοποιήσεις αναχώρησης, άφιξης και καθυστέρησης.</p>
-<div class="push-actions">
-<button type="button" id="pushEnable">Ενεργοποίηση ειδοποιήσεων</button>
-<button type="button" id="pushTest" hidden>Δοκιμή push</button>
-<button type="button" id="pushDisable" hidden>Απενεργοποίηση</button>
-</div><a id="pushStandalone" href="./" target="_blank" rel="noopener" hidden>Άνοιγμα Δρομολογίων για ενεργοποίηση push</a></section>
-</details>
+<button type="button" class="route-settings" id="routeSettings" data-no-swipe aria-label="Ρυθμίσεις" aria-haspopup="dialog" aria-controls="routeSettingsDialog" aria-expanded="false"><span class="settings-gear" aria-hidden="true">⚙</span></button>
 </div>
 <main id="main" aria-live="polite"><div class="empty">Σύνδεση με τη βάση δεδομένων…</div></main>
 
@@ -744,6 +736,15 @@ dialog .buttons>button{text-align:center}
 <button type="button" data-tab="stats"><span>▥</span>Στατιστικά</button>
 </nav>
 <div id="toast" class="status hidden" role="status"></div>
+<dialog id="routeSettingsDialog" aria-labelledby="routeSettingsTitle" data-no-swipe><div class="route-settings-head"><h2 id="routeSettingsTitle">Ρυθμίσεις</h2><button type="button" class="route-settings-close" id="routeSettingsClose" aria-label="Κλείσιμο">×</button></div><section class="push-panel" id="douleiaPush" aria-label="Ειδοποιήσεις δρομολογίων">
+<div class="push-label">🔔 Ειδοποιήσεις δρομολογίων</div>
+<p class="push-status" id="pushStatus" aria-live="polite">Ειδοποιήσεις αναχώρησης, άφιξης και καθυστέρησης.</p>
+<div class="push-actions">
+<button type="button" id="pushEnable">Ενεργοποίηση ειδοποιήσεων</button>
+<button type="button" id="pushTest" hidden>Δοκιμή push</button>
+<button type="button" id="pushDisable" hidden>Απενεργοποίηση</button>
+</div><a id="pushStandalone" href="./?push=settings" target="_blank" rel="noopener noreferrer" hidden>Άνοιγμα στον browser για άδεια ειδοποιήσεων</a></section>
+</dialog>
 <dialog id="editDialog"><h2>Διόρθωση δρομολογίου</h2><form id="editForm">
 <p class="edit-service-day">Δρομολόγιο: <strong id="editRouteLabel"></strong> · <span id="editServiceDay"></span></p>
 <div class="edit-time-grid">
@@ -801,9 +802,9 @@ function startupPushNotice(key,openSettings,enabled){
   if(!status)return;
   const permitted=supported()&&Notification.permission==="granted";
   const embedded=window.top!==window.self;
-  if($("pushStandalone"))$("pushStandalone").hidden=!embedded;
-  status.textContent=note || (embedded&&!enabled?"Άνοιξε τα Δρομολόγια ξεχωριστά για να επιτρέψεις τις ειδοποιήσεις.":!supported()?"Η συσκευή δεν υποστηρίζει Web Push.":enabled?"Push ενεργό · Θα ειδοποιείσαι όταν οδηγός αναχωρεί ή επιστρέφει, καθώς και σε καθυστέρηση.":Notification.permission==="denied"?"Οι ειδοποιήσεις έχουν αποκλειστεί στον browser.":"Ειδοποιήσεις αναχώρησης, άφιξης και καθυστέρησης.");
-  enable.hidden=enabled||embedded;test.hidden=!enabled;disable.hidden=!enabled;
+  if($("pushStandalone"))$("pushStandalone").hidden=!(embedded&&!permitted&&!enabled);
+  status.textContent=note || (embedded&&!permitted&&!enabled?"Για να δώσεις άδεια ειδοποιήσεων, δοκίμασε Ενεργοποίηση. Αν ο browser την εμποδίσει, άνοιξε τον σύνδεσμο παρακάτω.":!supported()?"Η συσκευή δεν υποστηρίζει Web Push.":enabled?"Push ενεργό · Θα ειδοποιείσαι όταν οδηγός αναχωρεί ή επιστρέφει, καθώς και σε καθυστέρηση.":Notification.permission==="denied"?"Οι ειδοποιήσεις έχουν αποκλειστεί στον browser.":"Ειδοποιήσεις αναχώρησης, άφιξης και καθυστέρησης.");
+  enable.hidden=enabled;test.hidden=!enabled;disable.hidden=!enabled;
   enable.disabled=busy;
   enable.title=!supported()?"Πάτησε για οδηγίες υποστήριξης ειδοποιήσεων":"";
   const seconds=Math.max(0,Math.ceil((lastTestAt+45000-Date.now())/1000));
@@ -826,8 +827,9 @@ function startupPushNotice(key,openSettings,enabled){
   return keyPromise;
  }
  async function registration(){
-  await navigator.serviceWorker.register("./sw.js",{scope:"./"});
-  return navigator.serviceWorker.ready;
+  const reg=await navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"});
+  if(reg.active)return reg;
+  return await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{clearInterval(check);reject(new Error("Η σύνδεση Push καθυστέρησε. Δοκίμασε ξανά."));},12000);const check=setInterval(()=>{if(reg.active){clearTimeout(timer);clearInterval(check);resolve(reg)}},100);});
  }
  async function connect(allowSubscribe){
   const reg=await registration();
@@ -844,9 +846,9 @@ function startupPushNotice(key,openSettings,enabled){
   try{
    if(!supported())throw new Error("Αυτό το περιβάλλον δεν υποστηρίζει Web Push. Άνοιξε τα Δρομολόγια απευθείας στον Chrome και όχι μέσα σε άλλη εφαρμογή.");
    if(Notification.permission==="denied")throw new Error("Οι ειδοποιήσεις είναι αποκλεισμένες. Άνοιξε τις ρυθμίσεις του Chrome → Δικαιώματα ιστοτόπου → Ειδοποιήσεις και επέτρεψέ τες.");
-   if(window.top!==window.self)throw new Error("Άνοιξε τα Δρομολόγια σε ξεχωριστό παράθυρο για να δώσεις άδεια.");
+
    const permission=Notification.permission==="default"?await Notification.requestPermission():Notification.permission;
-   if(permission!=="granted")throw new Error("Δεν δόθηκε άδεια ειδοποιήσεων.");
+   if(permission!=="granted")throw new Error(window.top!==window.self?"Δεν δόθηκε άδεια. Χρησιμοποίησε τον σύνδεσμο Άνοιγμα στον browser και ενεργοποίησε από εκεί.":"Δεν δόθηκε άδεια ειδοποιήσεων.");
    await getKey();
    state("Σύνδεση της συσκευής με την υπηρεσία Push…");
    await connect(true);
@@ -873,12 +875,15 @@ function startupPushNotice(key,openSettings,enabled){
   }catch(e){state(e.message||"Αδυναμία απενεργοποίησης.");}
   finally{busy=false;state($("pushStatus")?.textContent||"");}
  }
+ function openSettings(){const d=$("routeSettingsDialog");if(d&&!d.open){d.showModal();$("routeSettings").setAttribute("aria-expanded","true");}}
  async function init(){
+  const d=$("routeSettingsDialog");$("routeSettings").addEventListener("click",openSettings);$("routeSettingsClose").addEventListener("click",()=>d.close());d.addEventListener("close",()=>{$("routeSettings").setAttribute("aria-expanded","false");$("routeSettings").focus({preventScroll:true})});d.addEventListener("click",e=>{if(e.target!==d)return;const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close()});
+  const url=new URL(location.href),direct=url.searchParams.get("push")==="settings";if(direct){url.searchParams.delete("push");history.replaceState(history.state,"",url);window.__pushNoticeDismissed=true;openSettings()}
   $("pushEnable")?.addEventListener("click",enable);
   $("pushTest")?.addEventListener("click",test);
   $("pushDisable")?.addEventListener("click",disable);
   state();
-  try{if(supported()&&Notification.permission==="granted"&&getCredentials()){await getKey();await connect(false)}}catch(e){console.warn("Douleia Push reconnect:",e);state("Δεν έγινε σύνδεση Push. Πάτησε Ενεργοποίηση.");}finally{if(supported())startupPushNotice("douleia.push.notice.hide",()=>{if(window.self!==window.top){window.open(location.href,"_blank","noopener");return} $("routeSettings").open=true;$("douleiaPush").scrollIntoView({block:"center"})},enabled)}
+  try{if(supported()&&Notification.permission==="granted"&&getCredentials()){await getKey();await connect(false)}}catch(e){console.warn("Douleia Push reconnect:",e);state("Δεν έγινε σύνδεση Push. Πάτησε Ενεργοποίηση.");}finally{if(supported()&&!direct&&!d.open)startupPushNotice("douleia.push.notice.hide",openSettings,enabled)}
  }
  window.DouleiaPushDiagnostics={supported,permission:()=>("Notification" in window?Notification.permission:"unsupported"),registered:()=>enabled};
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
